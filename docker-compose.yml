@@ -1,0 +1,36 @@
+services:
+  # 后端服务
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: nju-lib-backend
+    restart: always
+    networks:
+      - app-network
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - TZ=Asia/Shanghai
+
+  # 前端服务
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: nju-lib-frontend
+    restart: always
+    networks:
+      - app-network
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    environment:
+      - TZ=Asia/Shanghai
+
+# 网络配置
+networks:
+  app-network:
+    driver: bridge

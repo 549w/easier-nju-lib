@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>南京大学图书馆检索系统</title>
+  <!-- React CDN -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <!-- Axios CDN -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <!-- 全局CSS -->
+  <style>
+    /* 全局样式重置 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+
+    /* App组件样式 */
+    .app {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .app-header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .app-header h1 {
+      color: #2c3e50;
+      margin-bottom: 10px;
+      font-size: 2.5rem;
+    }
+
+    .app-header p {
+      color: #7f8c8d;
+      font-size: 1.1rem;
+    }
+
+    .app-main {
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* SearchBar组件样式 */
+    .search-form {
+      margin-bottom: 30px;
+    }
+
+    .search-input-container {
+      display: flex;
+      gap: 10px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 12px 16px;
+      font-size: 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 4px;
+      transition: border-color 0.3s;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #3498db;
+    }
+
+    .search-button {
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .search-button:hover {
+      background-color: #2980b9;
+    }
+
+    /* BookCard组件样式 */
+    .book-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .book-card {
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .book-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .book-card-header {
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .book-title {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+      color: #2c3e50;
+    }
+
+    .book-status {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+
+    .status-available {
+      background-color: #27ae60;
+      color: white;
+    }
+
+    .status-loaned {
+      background-color: #e74c3c;
+      color: white;
+    }
+
+    .status-unknown {
+      background-color: #95a5a6;
+      color: white;
+    }
+
+    .book-card-content p {
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      color: #555;
+    }
+
+    /* 馆藏信息样式 */
+    .book-holdings {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .book-holdings h4 {
+      font-size: 1rem;
+      margin-bottom: 10px;
+      color: #2c3e50;
+    }
+
+    .holding-item {
+      margin-bottom: 15px;
+      padding: 10px;
+      background-color: #f5f5f5;
+      border-radius: 4px;
+    }
+
+    .holding-item p {
+      margin-bottom: 5px;
+    }
+
+    .no-holdings {
+      color: #7f8c8d;
+      font-style: italic;
+    }
+
+    /* 状态提示样式 */
+    .loading,
+    .error,
+    .empty {
+      text-align: center;
+      padding: 40px;
+      color: #7f8c8d;
+      font-size: 1.1rem;
+    }
+
+    .error {
+      color: #e74c3c;
+    }
+
+    /* 页脚样式 */
+    .app-footer {
+      text-align: center;
+      margin-top: 40px;
+      padding: 20px;
+      color: #7f8c8d;
+      font-size: 0.9rem;
+    }
+
+    /* 用户认证相关样式 */
+    .auth-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      justify-content: center;
+    }
+
+    .auth-button {
+      padding: 8px 16px;
+      font-size: 14px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .auth-button:hover {
+      background-color: #2980b9;
+    }
+
+    /* 模态框样式 */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background-color: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      width: 100%;
+      max-width: 500px;
+      position: relative;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      color: #2c3e50;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #7f8c8d;
+    }
+
+    .modal-close:hover {
+      color: #2c3e50;
+    }
+
+    /* 表单样式 */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 4px;
+      transition: border-color 0.3s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #3498db;
+    }
+
+    .form-button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .form-button:hover {
+      background-color: #2980b9;
+    }
+
+    .form-toggle {
+      text-align: center;
+      margin-top: 15px;
+      color: #7f8c8d;
+    }
+
+    .form-toggle a {
+      color: #3498db;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .form-toggle a:hover {
+      text-decoration: underline;
+    }
+
+    /* 校区选择样式 */
+    .campus-selector {
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    .campus-selector select {
+      padding: 8px 12px;
+      font-size: 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 4px;
+      background-color: white;
+    }
+
+    /* 搜索历史样式 */
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .history-item:hover {
+      background-color: #f5f5f5;
+    }
+
+    .history-keyword {
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    .history-date {
+      color: #7f8c8d;
+      font-size: 0.9rem;
+    }
+
+    .history-actions {
+      display: flex;
+      gap: 5px;
+    }
+
+    .history-button {
+      padding: 5px 10px;
+      font-size: 12px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .history-button:hover {
+      background-color: #2980b9;
+    }
+
+    /* 用户菜单样式 */
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .user-info {
+      color: #2c3e50;
+      font-weight: bold;
+    }
+
+    .logout-button {
+      padding: 8px 16px;
+      font-size: 14px;
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .logout-button:hover {
+      background-color: #c0392b;
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .search-input-container {
+        flex-direction: column;
+      }
+
+      .auth-buttons {
+        flex-direction: column;
+      }
+
+      .user-menu {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="[您的服务器用户名]"></div>
+
+  <script>
+    // 全局SearchBar组件函数
+    const SearchBar = ({ onSearch }) => {
+      // 使用React的useState Hook
+      const [query, setQuery] = React.useState('');
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        onSearch(query);
+      }
+
+      // 使用React.createElement替代JSX
+      return React.createElement('form', { className: 'search-form', onSubmit: handleSubmit },
+        React.createElement('div', { className: 'search-input-container' },
+          React.createElement('input', {
+            type: 'text',
+            className: 'search-input',
+            placeholder: '请输入书名...',
+            value: query,
+            onChange: (e) => setQuery(e.target.value),
+            autoComplete: 'off'
+          }),
+          React.createElement('button', { type: 'submit', className: 'search-button' },
+            // SVG图标使用简单的文字替代
+            '搜索'
+          )
+        )
+      );
+    }
+
+    // 全局BookCard组件函数
+    const BookCard = ({ book }) => {
+      const { title, author, publisher, year, holdings } = book;
+
+      const getStatusColor = (status) => {
+        if (status && status.includes('可借')) return 'status-available';
+        if (status && status.includes('借出')) return 'status-loaned';
+        return 'status-unknown';
+      }
+
+      // 使用React.createElement替代JSX
+      return React.createElement('div', { className: 'book-card' },
+        React.createElement('div', { className: 'book-card-header' },
+          React.createElement('h3', { className: 'book-title' }, title || '未知书名')
+        ),
+
+        React.createElement('div', { className: 'book-card-content' },
+          React.createElement('p', { className: 'book-author' }, `作者: ${author || '未知'}`),
+          React.createElement('p', { className: 'book-publisher' }, `出版社: ${publisher || '未知'} ${year || ''}`),
+
+          holdings && holdings.length > 0 ?
+            React.createElement('div', { className: 'book-holdings' },
+              React.createElement('h4', null, '物理馆藏信息：'),
+              holdings.map((holding, idx) =>
+                React.createElement('div', { key: idx, className: 'holding-item' },
+                  React.createElement('p', null, `索书号: ${holding.callNumber || '未知'}`),
+                  React.createElement('p', null, `馆藏地: ${holding.location || '未知'}`),
+                  React.createElement('p', null,
+                    `状态: `,
+                    React.createElement('span', { className: `book-status ${getStatusColor(holding.status)}` }, holding.status || '未知状态')
+                  )
+                )
+              )
+            ) :
+            React.createElement('p', { className: 'no-holdings' }, '暂无馆藏信息')
+        )
+      );
+    }
+
+    // 全局App组件函数
+    function App() {
+      // 使用React的useState Hook
+      const [books, setBooks] = React.useState([]);
+      const [loading, setLoading] = React.useState(false);
+      const [error, setError] = React.useState(null);
+
+      // 用户认证状态
+      const [user, setUser] = React.useState(null);
+      const [token, setToken] = React.useState(null);
+      const [showAuthModal, setShowAuthModal] = React.useState(false);
+      const [isLogin, setIsLogin] = React.useState(true);
+      const [authError, setAuthError] = React.useState(null);
+
+      // 用户输入
+      const [username, setUsername] = React.useState('');
+      const [password, setPassword] = React.useState('');
+      const [campus, setCampus] = React.useState('');
+
+      // 搜索历史
+      const [showHistory, setShowHistory] = React.useState(false);
+      const [searchHistory, setSearchHistory] = React.useState([]);
+
+      // 组件挂载时初始化数据
+      React.useEffect(() => {
+        // 从localStorage加载用户信息和token
+        const savedUser = localStorage.getItem('user');
+        const savedToken = localStorage.getItem('token');
+
+        if (savedUser && savedToken) {
+          setUser(JSON.parse(savedUser));
+          setToken(savedToken);
+          setCampus(JSON.parse(savedUser).campus);
+
+          // 获取搜索历史
+          fetchSearchHistory(savedToken);
+        }
+      }, []);
+
+      // 登录/注册处理
+      const handleAuth = async (e) => {
+        e.preventDefault();
+        setAuthError(null);
+
+        try {
+          const url = isLogin ? 'http://localhost:5000/api/login' : 'http://localhost:5000/api/register';
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, password, campus })
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.message || '认证失败');
+          }
+
+          // 保存用户信息和token
+          setUser(data.user);
+          setToken(data.token);
+          setCampus(data.user.campus);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          localStorage.setItem('token', data.token);
+
+          // 获取搜索历史
+          fetchSearchHistory(data.token);
+
+          // 关闭模态框
+          setShowAuthModal(false);
+        } catch (err) {
+          setAuthError(err.message);
+        }
+      };
+
+      // 登出处理
+      const handleLogout = () => {
+        setUser(null);
+        setToken(null);
+        setCampus('');
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        setSearchHistory([]);
+      };
+
+      // 更新校区
+      const handleCampusChange = async (e) => {
+        const newCampus = e.target.value;
+        setCampus(newCampus);
+
+        if (user && token) {
+          try {
+            const response = await fetch('http://localhost:5000/api/set-campus', {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({ campus: newCampus })
+            });
+
+            if (response.ok) {
+              const updatedUser = { ...user, campus: newCampus };
+              setUser(updatedUser);
+              localStorage.setItem('user', JSON.stringify(updatedUser));
+            }
+          } catch (err) {
+            console.error('更新校区失败:', err);
+          }
+        }
+      };
+
+      // 获取搜索历史
+      const fetchSearchHistory = async (authToken) => {
+        try {
+          const response = await fetch('http://localhost:5000/api/search-history', {
+            headers: {
+              'Authorization': `Bearer ${authToken}`
+            }
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            setSearchHistory(data);
+          }
+        } catch (err) {
+          console.error('获取搜索历史失败:', err);
+        }
+      };
+
+      // 搜索处理
+      const handleSearch = async (query) => {
+        if (!query.trim()) return;
+
+        setLoading(true);
+        setError(null);
+
+        try {
+          // 构建请求头
+          const headers = {};
+          if (token) {
+            headers.Authorization = `Bearer ${token}`;
+          }
+
+          // 直接调用后端服务地址
+          const response = await fetch(`http://localhost:5000/api/search?query=${encodeURIComponent(query)}`, {
+            headers: headers
+          });
+
+          if (!response.ok) throw new Error('搜索失败');
+
+          const data = await response.json();
+          setBooks(data);
+
+          // 更新搜索历史
+          if (token) {
+            fetchSearchHistory(token);
+          }
+        } catch (err) {
+          setError(err.message);
+          setBooks([]);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      // 从历史记录重新搜索
+      const searchFromHistory = (keyword) => {
+        handleSearch(keyword);
+        setShowHistory(false);
+      };
+
+      // 渲染认证模态框
+      const renderAuthModal = () => {
+        if (!showAuthModal) return null;
+
+        return React.createElement('div', { className: 'modal-overlay' },
+          React.createElement('div', { className: 'modal-content' },
+            React.createElement('div', { className: 'modal-header' },
+              React.createElement('h2', { className: 'modal-title' }, isLogin ? '登录' : '注册'),
+              React.createElement('button', {
+                className: 'modal-close',
+                onClick: () => setShowAuthModal(false)
+              }, '×')
+            ),
+
+            React.createElement('form', { onSubmit: handleAuth },
+              authError && React.createElement('div', { className: 'error' }, authError),
+
+              React.createElement('div', { className: 'form-group' },
+                React.createElement('label', { className: 'form-label' }, '用户名'),
+                React.createElement('input', {
+                  type: 'text',
+                  className: 'form-input',
+                  value: username,
+                  onChange: (e) => setUsername(e.target.value),
+                  required: true
+                })
+              ),
+
+              React.createElement('div', { className: 'form-group' },
+                React.createElement('label', { className: 'form-label' }, '密码'),
+                React.createElement('input', {
+                  type: 'password',
+                  className: 'form-input',
+                  value: password,
+                  onChange: (e) => setPassword(e.target.value),
+                  required: true
+                })
+              ),
+
+              !isLogin && React.createElement('div', { className: 'form-group' },
+                React.createElement('label', { className: 'form-label' }, '校区'),
+                React.createElement('select', {
+                  className: 'form-input',
+                  value: campus,
+                  onChange: (e) => setCampus(e.target.value),
+                  required: true
+                },
+                  React.createElement('option', { value: '' }, '请选择校区'),
+                  React.createElement('option', { value: '鼓楼' }, '鼓楼校区'),
+                  React.createElement('option', { value: '仙林' }, '仙林校区'),
+                  React.createElement('option', { value: '浦口' }, '浦口校区'),
+                  React.createElement('option', { value: '苏州' }, '苏州校区')
+                )
+              ),
+
+              React.createElement('button', { type: 'submit', className: 'form-button' },
+                isLogin ? '登录' : '注册'
+              ),
+
+              React.createElement('div', { className: 'form-toggle' },
+                isLogin ?
+                  React.createElement('span', null,
+                    '还没有账号？ ',
+                    React.createElement('a', { onClick: () => setIsLogin(false) }, '立即注册')
+                  ) :
+                  React.createElement('span', null,
+                    '已有账号？ ',
+                    React.createElement('a', { onClick: () => setIsLogin(true) }, '立即登录')
+                  )
+              )
+            )
+          )
+        );
+      };
+
+      // 渲染搜索历史模态框
+      const renderHistoryModal = () => {
+        if (!showHistory) return null;
+
+        return React.createElement('div', { className: 'modal-overlay' },
+          React.createElement('div', { className: 'modal-content' },
+            React.createElement('div', { className: 'modal-header' },
+              React.createElement('h2', { className: 'modal-title' }, '搜索历史'),
+              React.createElement('button', {
+                className: 'modal-close',
+                onClick: () => setShowHistory(false)
+              }, '×')
+            ),
+
+            searchHistory.length > 0 ?
+              searchHistory.map((item, index) =>
+                React.createElement('div', { key: index, className: 'history-item' },
+                  React.createElement('div', null,
+                    React.createElement('div', { className: 'history-keyword' }, item.query),
+                    React.createElement('div', { className: 'history-date' }, new Date(item.search_time).toLocaleString())
+                  ),
+                  React.createElement('div', { className: 'history-actions' },
+                    React.createElement('button', {
+                      className: 'history-button',
+                      onClick: () => searchFromHistory(item.query)
+                    }, '重新搜索')
+                  )
+                )
+              ) :
+              React.createElement('p', { className: 'empty' }, '暂无搜索历史')
+          )
+        );
+      };
+
+      // 使用React.createElement替代JSX
+      return React.createElement('div', { className: 'app' },
+        React.createElement('header', { className: 'app-header' },
+          React.createElement('h1', null, '南京大学图书馆检索系统'),
+          React.createElement('p', null, '快速查找图书馆馆藏图书'),
+
+          // 用户认证按钮或用户信息
+          user ?
+            React.createElement('div', { className: 'user-menu' },
+              React.createElement('span', { className: 'user-info' }, `欢迎, ${user.username}`),
+              React.createElement('button', {
+                className: 'auth-button',
+                onClick: () => setShowHistory(true)
+              }, '搜索历史'),
+              React.createElement('button', {
+                className: 'logout-button',
+                onClick: handleLogout
+              }, '退出登录')
+            ) :
+            React.createElement('div', { className: 'auth-buttons' },
+              React.createElement('button', {
+                className: 'auth-button',
+                onClick: () => { setIsLogin(true); setShowAuthModal(true); }
+              }, '登录'),
+              React.createElement('button', {
+                className: 'auth-button',
+                onClick: () => { setIsLogin(false); setShowAuthModal(true); }
+              }, '注册')
+            )
+        ),
+
+        user && React.createElement('div', { className: 'campus-selector' },
+          React.createElement('select', { value: campus, onChange: handleCampusChange },
+            React.createElement('option', { value: '鼓楼' }, '鼓楼校区'),
+            React.createElement('option', { value: '仙林' }, '仙林校区'),
+            React.createElement('option', { value: '浦口' }, '浦口校区'),
+            React.createElement('option', { value: '苏州' }, '苏州校区')
+          )
+        ),
+
+        React.createElement('main', { className: 'app-main' },
+          React.createElement(SearchBar, { onSearch: handleSearch }),
+
+          loading ?
+            React.createElement('div', { className: 'loading' },
+              React.createElement('p', null, '正在搜索中...')
+            ) : null,
+
+          error ?
+            React.createElement('div', { className: 'error' },
+              React.createElement('p', null, error)
+            ) : null,
+
+          !loading && !error && books.length === 0 ?
+            React.createElement('div', { className: 'empty' },
+              React.createElement('p', null, '请输入书名进行搜索')
+            ) : null,
+
+          books.length > 0 ?
+            React.createElement('div', { className: 'book-grid' },
+              books.map((book, index) =>
+                React.createElement(BookCard, { key: index, book: book })
+              )
+            ) : null
+        ),
+
+        React.createElement('footer', { className: 'app-footer' },
+          React.createElement('p', null, '© 2024 南京大学图书馆检索系统')
+        ),
+
+        // 模态框
+        renderAuthModal(),
+        renderHistoryModal()
+      );
+    }
+
+    // 使用CDN版本的React
+    const { createRoot } = ReactDOM;
+
+    // 创建根节点并渲染应用
+    const [您的服务器用户名] = createRoot(document.getElementById('[您的服务器用户名]'));
+
+    // 使用React.StrictMode渲染App组件
+    [您的服务器用户名].render(
+      React.createElement(React.StrictMode, null,
+        React.createElement(App)
+      )
+    );
+  </script>
+</body>
+
+</html>

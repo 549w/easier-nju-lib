@@ -38,115 +38,73 @@ class OPACSpider:
         """根据书名搜索图书"""
         logger = logging.getLogger('OPACSpider')
         logger.info(f"开始搜索图书: {title}")
-        logger.info("使用新的微信图书馆接口")
         
         try:
-            # 新的微信图书馆接口参数
+            # 使用用户提供的正确URL结构
             search_params = {
                 'mappingPath': 'njulib',
                 'groupCode': '200027',
                 'openid': 'oeL7DjraEzAnkWJpPrebGqI6B55I',
                 'pubId': '1',
-                'searchFieldContent': title,  # 替换为实际搜索词
+                'searchFieldContent': title,
                 'searchField': 'keyWord',
                 'page': page,
                 'rows': max_results
             }
             
-            # 构造完整请求URL用于调试
-            full_url = f"{SEARCH_URL}?{urllib.parse.urlencode(search_params)}"
-            logger.info(f"完整请求URL: {full_url}")
-            logger.info(f"尝试连接微信图书馆接口: {SEARCH_URL}")
-            logger.debug(f"搜索参数: {search_params}")
+            logger.info(f"发送搜索请求到: {SEARCH_URL}，参数: {search_params}")
             
+            # 发送HTTP请求
             response = self.session.get(SEARCH_URL, params=search_params, headers=self.headers, timeout=30)
             response.raise_for_status()
             
-            logger.info(f"成功连接到微信图书馆接口，响应状态码: {response.status_code}")
-            logger.info(f"响应头: {dict(response.headers)}")
-            logger.info(f"响应内容前1000字符: {response.text[:1000]}...")
+            logger.info(f"搜索请求成功，状态码: {response.status_code}")
             
-            # 保存响应内容用于调试
-            with open('response_debug.html', 'w', encoding='utf-8') as f:
-                f.write(response.text)
-            logger.info("响应内容已保存到 response_debug.html")
-            
-            # 检查是否为错误页面
-            if '错误' in response.text or '404' in response.text:
-                logger.warning("检测到错误页面")
-                return self._get_mock_data(title, max_results)
-            
-            # 尝试解析JSON响应
-            try:
-                data = response.json()
-                logger.info("成功解析JSON响应")
-                
-                # 提取图书数据
-                books = []
-                
-                # 检查不同的数据结构
-                if isinstance(data, dict):
-                    # 微信图书馆接口的响应结构可能不同，需要根据实际返回调整
-                    logger.debug(f"JSON响应结构: {list(data.keys())}")
-                    
-                    # 先检查最常见的结构
-                    if 'data' in data and isinstance(data['data'], dict):
-                        if 'list' in data['data']:
-                            books_data = data['data']['list']
-                        elif 'books' in data['data']:
-                            books_data = data['data']['books']
-                        else:
-                            logger.warning(f"未知的数据结构，keys: {list(data['data'].keys())}")
-                            books_data = []
-                    elif 'list' in data:
-                        books_data = data['list']
-                    elif 'books' in data:
-                        books_data = data['books']
-                    else:
-                        logger.warning(f"未知的响应结构，keys: {list(data.keys())}")
-                        books_data = []
-                else:
-                    # 如果直接是列表
-                    books_data = data
-                
-                for i, book in enumerate(books_data[:max_results]):
-                    # 检查是否有recordId用于获取详细馆藏信息
-                    record_id = book.get('recordId')
-                    holdings = []
-                    if record_id:
-                        holdings = self.get_book_details(record_id)
-                    
-                    # 根据实际返回的字段名调整
-                    book_info = {
-                        "title": str(book.get('title', f'图书 {i+1}')),
-                        "author": str(book.get('author', '未知作者')),
-                        "publisher": str(book.get('publisher', '未知出版社')),
-                        "year": str(book.get('year', '未知年份')),
-                        "holdings": holdings  # 添加馆藏信息列表
-                    }
-                    books.append(book_info)
-                
-                if books:
-                    logger.info(f"从JSON响应获取 {len(books)} 本图书数据")
-                    return books
-                else:
-                    logger.warning("JSON响应中未包含图书数据")
-                    # 尝试解析HTML响应，作为备选方案
-                    return self._parse_html_response(response.text, title, max_results)
-                    
-            except ValueError:
-                logger.warning("响应不是有效的JSON格式，尝试解析HTML")
-                return self._parse_html_response(response.text, title, max_results)
+            # 直接解析HTML响应，从JavaScript代码中提取JSON数据
+            return self._parse_html_response(response.text, title, max_results)
                 
         except requests.exceptions.RequestException as e:
-            logger.error(f"网络请求失败: {str(e)}")
-            logger.warning("网络请求失败，使用模拟数据")
-            return self._get_mock_data(title, max_results)
+            logger.error(f"网络请求出错: {str(e)}")
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON解析出错: {str(e)}")
         except Exception as e:
-            logger.error(f"搜索出错: {str(e)}")
+            logger.error(f"搜索过程中出错: {str(e)}")
             import traceback
-            logger.error(traceback.format_exc())
-            logger.warning("搜索出错，使用模拟数据")
+            logger.error(f"错误详情: {traceback.format_exc()}")
+        
+        # 如果所有方法都失败，回退到模拟数据
+        logger.warning("所有搜索方法失败，回退到模拟数据")
+        return self._get_mock_data(title, max_results)
+    
+    def _parse_original_response(self, title, page, max_results):
+        """使用原始的HTML解析方法作为回退方案"""
+        logger = logging.getLogger('OPACSpider')
+        logger.info("使用原始HTML解析方法作为回退")
+        
+        # 构造搜索参数
+        search_params = {
+            'searchFieldContent': title,
+            'mappingPath': 'njulib',
+            'groupCode': '200027',
+            'searchField': 'keyWord',
+            'page': page,
+            'rows': max_results
+        }
+        
+        # 使用原来的URL
+        logger.info(f"发送HTML请求到: {SEARCH_URL}，参数: {search_params}")
+        
+        try:
+            # 发送HTTP请求
+            response = self.session.get(SEARCH_URL, params=search_params, headers=self.headers, timeout=30)
+            response.raise_for_status()
+            
+            logger.info(f"HTML请求成功，状态码: {response.status_code}")
+            
+            # 使用HTML解析方法
+            return self._parse_html_response(response.text, title, max_results)
+        except Exception as e:
+            logger.error(f"原始响应解析失败: {str(e)}")
             return self._get_mock_data(title, max_results)
     
     # 添加一个简单的HTML解析方法作为备选
@@ -228,6 +186,86 @@ class OPACSpider:
         logger = logging.getLogger('OPACSpider')
         logger.info("尝试解析HTML响应")
         
+        # 添加更多调试信息，将HTML内容保存到文件
+        debug_file = f'd:\\easier-nju-lib\\debug_html_response_{title}.html'
+        with open(debug_file, 'w', encoding='utf-8') as f:
+            f.write(html_content)
+        logger.info(f"HTML响应已保存到调试文件: {debug_file}")
+        logger.info(f"HTML内容前1000个字符: {html_content[:1000]}...")
+        
+        # 1. 首先尝试从JavaScript代码中提取JSON数据
+        logger.info("尝试从JavaScript代码中提取JSON数据")
+        
+        # 查找包含图书数据的JavaScript代码
+        json_data_match = re.search(r'var\s+data\s*=\s*(\{.*?\});\s*\\/\\/\s*获取数据', html_content, re.DOTALL)
+        if not json_data_match:
+            # 尝试其他可能的模式
+            json_data_match = re.search(r'var\s+data\s*=\s*(\{.*?\});', html_content, re.DOTALL)
+        
+        if json_data_match:
+            logger.info("找到包含JSON数据的JavaScript代码")
+            json_str = json_data_match.group(1)
+            logger.debug(f"提取到的JSON字符串前500字符: {json_str[:500]}...")
+            
+            try:
+                # 解析JSON数据
+                data = json.loads(json_str)
+                logger.debug(f"成功解析JSON数据")
+                
+                # 从JSON数据中提取图书列表
+                books = []
+                
+                # 检查JSON结构
+                if isinstance(data, dict):
+                    # 尝试不同的路径查找图书数据
+                    if 'list' in data:
+                        book_list = data['list']
+                    elif 'data' in data and isinstance(data['data'], dict) and 'list' in data['data']:
+                        book_list = data['data']['list']
+                    else:
+                        logger.warning("JSON数据结构不符合预期")
+                        book_list = []
+                    
+                    logger.info(f"从JSON中找到 {len(book_list)} 本图书")
+                    
+                    # 解析每本图书
+                    for book_data in book_list[:max_results]:
+                        try:
+                            book = {
+                                'title': book_data.get('title', f'未命名图书 {len(books)+1}'),
+                                'author': book_data.get('author', '未知作者'),
+                                'publisher': book_data.get('publisher', '未知出版社'),
+                                'year': book_data.get('year', ''),
+                                'holdings': []
+                            }
+                            
+                            # 获取馆藏信息
+                            record_id = book_data.get('recordId')
+                            if record_id:
+                                book['holdings'] = self.get_book_details(record_id)
+                            
+                            books.append(book)
+                            logger.info(f"从JSON解析到图书: {book['title']}")
+                        except Exception as e:
+                            logger.warning(f"解析单条JSON图书记录出错: {str(e)}")
+                            import traceback
+                            logger.warning(f"错误详情: {traceback.format_exc()}")
+                            continue
+                    
+                    if books:
+                        logger.info(f"JSON解析完成，共找到 {len(books)} 本图书")
+                        return books
+                    else:
+                        logger.warning("JSON数据中没有有效的图书信息")
+                
+            except json.JSONDecodeError as e:
+                logger.warning(f"解析JSON数据出错: {str(e)}")
+                import traceback
+                logger.warning(f"错误详情: {traceback.format_exc()}")
+        
+        # 2. 如果从JavaScript中提取JSON失败，尝试解析HTML结构
+        logger.info("尝试直接解析HTML结构")
+        
         from bs4 import BeautifulSoup
         soup = BeautifulSoup(html_content, 'lxml')
         
@@ -238,6 +276,13 @@ class OPACSpider:
         book_elements = soup.select('a.weui-media-box_appmsg')
         
         logger.info(f"找到 {len(book_elements)} 个可能的图书元素")
+        
+        # 测试其他选择器
+        if not book_elements:
+            other_selectors = ['a', 'div.weui-media-box', 'div']
+            for selector in other_selectors:
+                elements = soup.select(selector)
+                logger.info(f"使用选择器 '{selector}' 找到 {len(elements)} 个元素")
         
         for i, element in enumerate(book_elements[:max_results]):
             try:
@@ -279,7 +324,6 @@ class OPACSpider:
                 record_id = ''
                 if href:
                     # 从URL中提取recordId参数
-                    import re
                     record_match = re.search(r'recordId=([\d]+)', href)
                     if record_match:
                         record_id = record_match.group(1)
@@ -324,90 +368,104 @@ class OPACSpider:
                 "author": "Eric Matthes",
                 "publisher": "人民邮电出版社",
                 "year": "2020",
-                "callNumber": "TP312.8/P93",
-                "location": "理科借阅区",
-                "status": "可借"
+                "holdings": [
+                    {"callNumber": "TP312.8/P93/1", "location": "鼓楼理科借阅区", "status": "可借"},
+                    {"callNumber": "TP312.8/P93/2", "location": "仙林理科借阅区", "status": "借出"},
+                    {"callNumber": "TP312.8/P93/3", "location": "浦口理科借阅区", "status": "可借"}
+                ]
             },
             {
                 "title": "Python数据分析与可视化",
                 "author": "李继武",
                 "publisher": "清华大学出版社",
                 "year": "2021",
-                "callNumber": "TP312.8/P94",
-                "location": "理科借阅区",
-                "status": "借出"
+                "holdings": [
+                    {"callNumber": "TP312.8/P94/1", "location": "鼓楼理科借阅区", "status": "借出"},
+                    {"callNumber": "TP312.8/P94/2", "location": "仙林理科借阅区", "status": "可借"}
+                ]
             },
             {
                 "title": "Python网络爬虫开发与项目实战",
                 "author": "范传辉",
                 "publisher": "机械工业出版社",
                 "year": "2018",
-                "callNumber": "TP312.8/P95",
-                "location": "理科借阅区",
-                "status": "可借"
+                "holdings": [
+                    {"callNumber": "TP312.8/P95/1", "location": "仙林理科借阅区", "status": "可借"},
+                    {"callNumber": "TP312.8/P95/2", "location": "苏州校区借阅区", "status": "可借"},
+                    {"callNumber": "TP312.8/P95/3", "location": "鼓楼理科借阅区", "status": "借出"}
+                ]
             },
             {
                 "title": "Python机器学习基础教程",
                 "author": "Andreas C. Müller, Sarah Guido",
                 "publisher": "机械工业出版社",
                 "year": "2018",
-                "callNumber": "TP312.8/P96",
-                "location": "理科借阅区",
-                "status": "可借"
+                "holdings": [
+                    {"callNumber": "TP312.8/P96/1", "location": "仙林理科借阅区", "status": "可借"}
+                ]
             },
             {
                 "title": "Python核心编程",
                 "author": "Wesley Chun",
                 "publisher": "人民邮电出版社",
                 "year": "2016",
-                "callNumber": "TP312.8/P97",
-                "location": "理科借阅区",
-                "status": "借出"
+                "holdings": [
+                    {"callNumber": "TP312.8/P97/1", "location": "鼓楼理科借阅区", "status": "借出"},
+                    {"callNumber": "TP312.8/P97/2", "location": "仙林理科借阅区", "status": "可借"},
+                    {"callNumber": "TP312.8/P97/3", "location": "浦口理科借阅区", "status": "可借"}
+                ]
             },
             {
                 "title": "流畅的Python",
                 "author": "Luciano Ramalho",
                 "publisher": "人民邮电出版社",
                 "year": "2017",
-                "callNumber": "TP312.8/P98",
-                "location": "文科借阅区",
-                "status": "可借"
+                "holdings": [
+                    {"callNumber": "TP312.8/P98/1", "location": "鼓楼文科借阅区", "status": "可借"},
+                    {"callNumber": "TP312.8/P98/2", "location": "仙林文科借阅区", "status": "借出"}
+                ]
             },
             {
                 "title": "Python Web开发从入门到精通",
                 "author": "明日科技",
                 "publisher": "清华大学出版社",
                 "year": "2022",
-                "callNumber": "TP312.8/P99",
-                "location": "文科借阅区",
-                "status": "可借"
+                "holdings": [
+                    {"callNumber": "TP312.8/P99/1", "location": "仙林文科借阅区", "status": "可借"},
+                    {"callNumber": "TP312.8/P99/2", "location": "苏州校区借阅区", "status": "借出"}
+                ]
             },
             {
                 "title": "Python数据科学手册",
                 "author": "Jake VanderPlas",
                 "publisher": "机械工业出版社",
                 "year": "2018",
-                "callNumber": "TP312.8/P100",
-                "location": "理科借阅区",
-                "status": "可借"
+                "holdings": [
+                    {"callNumber": "TP312.8/P100/1", "location": "鼓楼理科借阅区", "status": "可借"},
+                    {"callNumber": "TP312.8/P100/2", "location": "仙林理科借阅区", "status": "可借"},
+                    {"callNumber": "TP312.8/P100/3", "location": "苏州校区借阅区", "status": "可借"}
+                ]
             },
             {
                 "title": "Python编程：从入门到实践（第2版）",
                 "author": "Eric Matthes",
                 "publisher": "人民邮电出版社",
                 "year": "2021",
-                "callNumber": "TP312.8/P101",
-                "location": "理科借阅区",
-                "status": "借出"
+                "holdings": [
+                    {"callNumber": "TP312.8/P101/1", "location": "鼓楼理科借阅区", "status": "借出"},
+                    {"callNumber": "TP312.8/P101/2", "location": "仙林理科借阅区", "status": "借出"},
+                    {"callNumber": "TP312.8/P101/3", "location": "浦口理科借阅区", "status": "可借"}
+                ]
             },
             {
                 "title": "Python算法教程",
                 "author": "Magnus Lie Hetland",
                 "publisher": "人民邮电出版社",
                 "year": "2015",
-                "callNumber": "TP312.8/P102",
-                "location": "理科借阅区",
-                "status": "可借"
+                "holdings": [
+                    {"callNumber": "TP312.8/P102/1", "location": "鼓楼理科借阅区", "status": "可借"},
+                    {"callNumber": "TP312.8/P102/2", "location": "仙林理科借阅区", "status": "借出"}
+                ]
             }
         ]
         

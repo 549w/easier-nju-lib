@@ -50,8 +50,10 @@ class Database:
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     user_id INTEGER NOT NULL,
                     query TEXT NOT NULL,
+                    location TEXT DEFAULT '',
                     search_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (user_id) REFERENCES users (id)
+                    FOREIGN KEY (user_id) REFERENCES users (id),
+                    UNIQUE(user_id, query, location) ON CONFLICT REPLACE
                 )
             ''')
             
@@ -120,15 +122,15 @@ class Database:
             self.conn.rollback()
             raise
     
-    def add_search_history(self, user_id, query):
-        """添加搜索历史记录"""
+    def add_search_history(self, user_id, query, location=''):
+        """添加搜索历史记录，自动去重"""
         try:
             self.cursor.execute(
-                "INSERT INTO search_history (user_id, query) VALUES (?, ?)",
-                (user_id, query)
+                "INSERT INTO search_history (user_id, query, location) VALUES (?, ?, ?)",
+                (user_id, query, location)
             )
             self.conn.commit()
-            logger.info(f"搜索历史记录添加成功: user_id={user_id}, query={query}")
+            logger.info(f"搜索历史记录添加成功: user_id={user_id}, query={query}, location={location}")
             return True
         except Exception as e:
             logger.error(f"添加搜索历史记录失败: {str(e)}")
@@ -139,19 +141,51 @@ class Database:
         """获取用户的搜索历史记录"""
         try:
             self.cursor.execute(
-                "SELECT query, search_time FROM search_history WHERE user_id = ? ORDER BY search_time DESC LIMIT ?",
+                "SELECT id, query, location, search_time FROM search_history WHERE user_id = ? ORDER BY search_time DESC LIMIT ?",
                 (user_id, limit)
             )
             # 将元组列表转换为字典列表
             results = []
             for row in self.cursor.fetchall():
                 results.append({
-                    'query': row[0],
-                    'search_time': row[1]
+                    'id': row[0],
+                    'query': row[1],
+                    'location': row[2],
+                    'search_time': row[3]
                 })
             return results
         except Exception as e:
             logger.error(f"获取搜索历史记录失败: {str(e)}")
+            raise
+    
+    def delete_search_history(self, user_id, history_id):
+        """删除单条搜索历史记录"""
+        try:
+            self.cursor.execute(
+                "DELETE FROM search_history WHERE user_id = ? AND id = ?",
+                (user_id, history_id)
+            )
+            self.conn.commit()
+            logger.info(f"搜索历史记录删除成功: user_id={user_id}, history_id={history_id}")
+            return True
+        except Exception as e:
+            logger.error(f"删除搜索历史记录失败: {str(e)}")
+            self.conn.rollback()
+            raise
+    
+    def clear_search_history(self, user_id):
+        """清空用户的所有搜索历史记录"""
+        try:
+            self.cursor.execute(
+                "DELETE FROM search_history WHERE user_id = ?",
+                (user_id,)
+            )
+            self.conn.commit()
+            logger.info(f"搜索历史记录清空成功: user_id={user_id}")
+            return True
+        except Exception as e:
+            logger.error(f"清空搜索历史记录失败: {str(e)}")
+            self.conn.rollback()
             raise
     
     def close(self):

@@ -10,6 +10,8 @@
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <!-- Axios CDN -->
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <!-- 全局CSS -->
   <style>
     /* 全局样式重置 */
@@ -19,179 +21,360 @@
       box-sizing: border-box;
     }
 
+    :[您的服务器用户名] {
+      --primary-color: #2563eb;
+      --primary-light: #3b82f6;
+      --primary-dark: #1d4ed8;
+      --secondary-color: #8b5cf6;
+      --success-color: #10b981;
+      --warning-color: #f59e0b;
+      --danger-color: #ef4444;
+      --text-primary: #1f2937;
+      --text-secondary: #6b7280;
+      --text-light: #9ca3af;
+      --bg-primary: #ffffff;
+      --bg-secondary: #f9fafb;
+      --bg-tertiary: #f3f4f6;
+      --border-color: #e5e7eb;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      --transition-fast: 0.15s ease-in-out;
+      --transition-normal: 0.3s ease-in-out;
+      --transition-slow: 0.5s ease-in-out;
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
         'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
         sans-serif;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      background-color: #f5f5f5;
-      color: #333;
+      background-color: var(--bg-secondary);
+      color: var(--text-primary);
+      line-height: 1.6;
     }
 
     /* App组件样式 */
     .app {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
     .app-header {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      color: white;
+      padding: 2rem 1rem;
       text-align: center;
-      margin-bottom: 40px;
-      padding: 20px;
-      background-color: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--shadow-lg);
     }
 
     .app-header h1 {
-      color: #2c3e50;
-      margin-bottom: 10px;
       font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      animation: fadeInDown 0.8s ease-out;
     }
 
     .app-header p {
-      color: #7f8c8d;
       font-size: 1.1rem;
+      opacity: 0.9;
+      animation: fadeInUp 0.8s ease-out 0.2s both;
     }
 
     .app-main {
-      background-color: #fff;
-      border-radius: 8px;
-      padding: 30px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 2rem auto;
+      padding: 0 1rem;
     }
 
     /* SearchBar组件样式 */
+    .search-section {
+      background-color: var(--bg-primary);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 2rem;
+      animation: fadeInUp 0.8s ease-out 0.4s both;
+    }
+
     .search-form {
-      margin-bottom: 30px;
+      margin-bottom: 0;
     }
 
     .search-input-container {
       display: flex;
-      gap: 10px;
-      max-width: 600px;
+      gap: 12px;
+      max-width: 900px;
       margin: 0 auto;
+      align-items: stretch;
+      flex-wrap: wrap;
+    }
+
+    .search-input-wrapper {
+      flex: 1;
+      min-width: 250px;
+      position: relative;
+    }
+
+    .location-select-wrapper {
+      min-width: 150px;
+      position: relative;
     }
 
     .search-input {
-      flex: 1;
-      padding: 12px 16px;
+      width: 100%;
+      padding: 16px 20px 16px 50px;
       font-size: 16px;
-      border: 2px solid #e0e0e0;
-      border-radius: 4px;
-      transition: border-color 0.3s;
+      border: 2px solid var(--border-color);
+      border-radius: 10px;
+      background-color: var(--bg-secondary);
+      transition: all var(--transition-normal);
+      font-weight: 500;
     }
 
-    .search-input:focus {
+    .location-select {
+      width: 100%;
+      padding: 16px 20px;
+      font-size: 16px;
+      border: 2px solid var(--border-color);
+      border-radius: 10px;
+      background-color: var(--bg-secondary);
+      transition: all var(--transition-normal);
+      font-weight: 500;
+      cursor: pointer;
+      appearance: none;
+      background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%236b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+    }
+
+    .search-input:focus,
+    .location-select:focus {
       outline: none;
-      border-color: #3498db;
+      border-color: var(--primary-color);
+      background-color: var(--bg-primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .search-input-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-light);
+      transition: color var(--transition-normal);
+    }
+
+    .search-input:focus+.search-input-icon {
+      color: var(--primary-color);
     }
 
     .search-button {
-      padding: 12px 24px;
+      padding: 16px 32px;
       font-size: 16px;
-      background-color: #3498db;
+      font-weight: 600;
+      background: linear-gradient(135deg, var(--primary-light), var(--primary-dark));
       color: white;
       border: none;
-      border-radius: 4px;
+      border-radius: 10px;
       cursor: pointer;
-      transition: background-color 0.3s;
+      transition: all var(--transition-normal);
+      box-shadow: var(--shadow-sm);
+      white-space: nowrap;
     }
 
     .search-button:hover {
-      background-color: #2980b9;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    }
+
+    .search-button:active {
+      transform: translateY(0);
+      box-shadow: var(--shadow-md);
     }
 
     /* BookCard组件样式 */
+    .books-container {
+      animation: fadeInUp 0.8s ease-out 0.6s both;
+    }
+
     .book-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
     }
 
     .book-card {
-      background-color: #f9f9f9;
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-      transition: transform 0.3s, box-shadow 0.3s;
+      background-color: var(--bg-primary);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-md);
+      transition: all var(--transition-normal);
+      border: 1px solid var(--border-color);
+      overflow: hidden;
     }
 
     .book-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-xl);
+      border-color: var(--primary-light);
     }
 
     .book-card-header {
-      margin-bottom: 15px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #e0e0e0;
+      margin-bottom: 1.25rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
     }
 
     .book-title {
-      font-size: 1.2rem;
-      margin-bottom: 10px;
-      color: #2c3e50;
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: var(--text-primary);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     .book-status {
-      display: inline-block;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 0.8rem;
-      font-weight: bold;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
     .status-available {
-      background-color: #27ae60;
-      color: white;
+      background-color: rgba(16, 185, 129, 0.1);
+      color: var(--success-color);
     }
 
     .status-loaned {
-      background-color: #e74c3c;
-      color: white;
+      background-color: rgba(245, 158, 11, 0.1);
+      color: var(--warning-color);
     }
 
     .status-unknown {
-      background-color: #95a5a6;
-      color: white;
+      background-color: rgba(107, 114, 128, 0.1);
+      color: var(--text-secondary);
+    }
+
+    .book-card-content {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
     }
 
     .book-card-content p {
-      margin-bottom: 8px;
-      font-size: 0.9rem;
-      color: #555;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .book-card-content i {
+      color: var(--text-light);
+      width: 18px;
+      text-align: center;
     }
 
     /* 馆藏信息样式 */
     .book-holdings {
-      margin-top: 15px;
-      padding-top: 15px;
-      border-top: 1px solid #e0e0e0;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-color);
     }
 
     .book-holdings h4 {
       font-size: 1rem;
-      margin-bottom: 10px;
-      color: #2c3e50;
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
     .holding-item {
-      margin-bottom: 15px;
-      padding: 10px;
-      background-color: #f5f5f5;
-      border-radius: 4px;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background-color: var(--bg-secondary);
+      border-radius: 8px;
+      border-left: 4px solid var(--primary-color);
+      transition: all var(--transition-normal);
     }
 
-    .holding-item p {
-      margin-bottom: 5px;
+    .holding-item:hover {
+      background-color: var(--bg-tertiary);
+      transform: translateX(4px);
+    }
+
+    .holding-item .holding-info-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .holding-item .holding-status-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .holding-item .holding-info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .holding-item .holding-info-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .holding-item .holding-info-value {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      background-color: rgba(255, 255, 255, 0.05);
+      padding: 0.5rem 0.75rem;
+      border-radius: 4px;
+      border-left: 2px solid var(--primary-color);
+    }
+
+    .holding-status-row .holding-info-value {
+      flex: 1;
+      background-color: transparent;
+      padding: 0;
+      border-left: none;
     }
 
     .no-holdings {
-      color: #7f8c8d;
+      color: var(--text-light);
       font-style: italic;
+      text-align: center;
+      padding: 1rem;
+      background-color: var(--bg-secondary);
+      border-radius: 8px;
     }
 
     /* 状态提示样式 */
@@ -199,45 +382,89 @@
     .error,
     .empty {
       text-align: center;
-      padding: 40px;
-      color: #7f8c8d;
-      font-size: 1.1rem;
+      padding: 4rem 2rem;
+      background-color: var(--bg-primary);
+      border-radius: 12px;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 2rem;
+      animation: fadeInUp 0.8s ease-out 0.6s both;
     }
 
-    .error {
-      color: #e74c3c;
+    .loading i,
+    .error i,
+    .empty i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .loading i {
+      color: var(--primary-color);
+      animation: spin 1.5s linear infinite;
+    }
+
+    .error i {
+      color: var(--danger-color);
+    }
+
+    .empty i {
+      color: var(--text-light);
+    }
+
+    .loading p,
+    .error p,
+    .empty p {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      margin: 0;
     }
 
     /* 页脚样式 */
     .app-footer {
       text-align: center;
-      margin-top: 40px;
-      padding: 20px;
-      color: #7f8c8d;
+      padding: 2rem 1rem;
+      background-color: var(--bg-primary);
+      border-top: 1px solid var(--border-color);
+      margin-top: auto;
+      color: var(--text-secondary);
       font-size: 0.9rem;
     }
 
     /* 用户认证相关样式 */
     .auth-buttons {
       display: flex;
-      gap: 10px;
-      margin-top: 20px;
+      gap: 12px;
       justify-content: center;
+      margin-top: 1.5rem;
     }
 
     .auth-button {
-      padding: 8px 16px;
+      padding: 12px 24px;
       font-size: 14px;
-      background-color: #3498db;
+      font-weight: 600;
+      background-color: rgba(255, 255, 255, 0.2);
       color: white;
-      border: none;
-      border-radius: 4px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
       cursor: pointer;
-      transition: background-color 0.3s;
+      transition: all var(--transition-normal);
+      backdrop-filter: blur(10px);
     }
 
     .auth-button:hover {
-      background-color: #2980b9;
+      background-color: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateY(-2px);
+    }
+
+    .auth-button-primary {
+      background-color: white;
+      color: var(--primary-color);
+      border-color: white;
+    }
+
+    .auth-button-primary:hover {
+      background-color: rgba(255, 255, 255, 0.9);
     }
 
     /* 模态框样式 */
@@ -252,200 +479,296 @@
       justify-content: center;
       align-items: center;
       z-index: 1000;
+      animation: fadeIn var(--transition-normal);
     }
 
     .modal-content {
-      background-color: white;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      background-color: var(--bg-primary);
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: var(--shadow-xl);
       width: 100%;
       max-width: 500px;
       position: relative;
+      animation: slideInUp var(--transition-normal);
     }
 
     .modal-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #e0e0e0;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
     }
 
     .modal-title {
       font-size: 1.5rem;
-      color: #2c3e50;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
     .modal-close {
       background: none;
       border: none;
-      font-size: 1.5rem;
+      font-size: 1.75rem;
       cursor: pointer;
-      color: #7f8c8d;
+      color: var(--text-light);
+      transition: color var(--transition-fast);
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all var(--transition-fast);
     }
 
     .modal-close:hover {
-      color: #2c3e50;
+      color: var(--text-primary);
+      background-color: var(--bg-secondary);
     }
 
     /* 表单样式 */
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: 1.5rem;
     }
 
     .form-label {
       display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-      color: #2c3e50;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 0.95rem;
     }
 
     .form-input {
       width: 100%;
       padding: 12px 16px;
-      font-size: 16px;
-      border: 2px solid #e0e0e0;
-      border-radius: 4px;
-      transition: border-color 0.3s;
+      font-size: 15px;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      background-color: var(--bg-secondary);
+      transition: all var(--transition-normal);
+      font-weight: 500;
     }
 
     .form-input:focus {
       outline: none;
-      border-color: #3498db;
+      border-color: var(--primary-color);
+      background-color: var(--bg-primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
     }
 
     .form-button {
       width: 100%;
-      padding: 12px;
+      padding: 14px;
       font-size: 16px;
-      background-color: #3498db;
+      font-weight: 600;
+      background: linear-gradient(135deg, var(--primary-light), var(--primary-dark));
       color: white;
       border: none;
-      border-radius: 4px;
+      border-radius: 8px;
       cursor: pointer;
-      transition: background-color 0.3s;
+      transition: all var(--transition-normal);
+      box-shadow: var(--shadow-sm);
     }
 
     .form-button:hover {
-      background-color: #2980b9;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
     }
 
     .form-toggle {
       text-align: center;
-      margin-top: 15px;
-      color: #7f8c8d;
+      margin-top: 1.5rem;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
     }
 
     .form-toggle a {
-      color: #3498db;
+      color: var(--primary-color);
       text-decoration: none;
+      font-weight: 600;
       cursor: pointer;
+      transition: color var(--transition-fast);
     }
 
     .form-toggle a:hover {
+      color: var(--primary-dark);
       text-decoration: underline;
     }
 
-    /* 校区选择样式 */
-    .campus-selector {
-      margin: 20px 0;
-      text-align: center;
-    }
-
-    .campus-selector select {
-      padding: 8px 12px;
-      font-size: 16px;
-      border: 2px solid #e0e0e0;
-      border-radius: 4px;
-      background-color: white;
-    }
-
     /* 搜索历史样式 */
+    .history-list {
+      max-height: 400px;
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+
     .history-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px;
-      border-bottom: 1px solid #e0e0e0;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+      transition: all var(--transition-fast);
+      border-radius: 6px;
+      margin-bottom: 4px;
     }
 
     .history-item:hover {
-      background-color: #f5f5f5;
+      background-color: var(--bg-secondary);
+      transform: translateX(4px);
     }
 
     .history-keyword {
-      font-weight: bold;
-      color: #2c3e50;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 0.95rem;
     }
 
     .history-date {
-      color: #7f8c8d;
-      font-size: 0.9rem;
+      color: var(--text-light);
+      font-size: 0.85rem;
+      white-space: nowrap;
     }
 
     .history-actions {
       display: flex;
-      gap: 5px;
+      gap: 8px;
     }
 
     .history-button {
-      padding: 5px 10px;
-      font-size: 12px;
-      background-color: #3498db;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      background-color: var(--primary-light);
       color: white;
       border: none;
-      border-radius: 4px;
+      border-radius: 6px;
       cursor: pointer;
-      transition: background-color 0.3s;
+      transition: all var(--transition-fast);
     }
 
     .history-button:hover {
-      background-color: #2980b9;
+      background-color: var(--primary-color);
+      transform: translateY(-1px);
     }
 
-    /* 用户菜单样式 */
-    .user-menu {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      margin-top: 20px;
+    /* 动画 */
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
-    .user-info {
-      color: #2c3e50;
-      font-weight: bold;
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
-    .logout-button {
-      padding: 8px 16px;
-      font-size: 14px;
-      background-color: #e74c3c;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background-color 0.3s;
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
     }
 
-    .logout-button:hover {
-      background-color: #c0392b;
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     /* 响应式设计 */
     @media (max-width: 768px) {
+      .app-header h1 {
+        font-size: 2rem;
+      }
+
+      .app-header p {
+        font-size: 1rem;
+      }
+
+      .search-section {
+        padding: 1.5rem 1rem;
+      }
+
       .search-input-container {
         flex-direction: column;
+        gap: 1rem;
+      }
+
+      .search-input {
+        padding: 14px 20px 14px 44px;
+      }
+
+      .search-button {
+        padding: 14px 24px;
+      }
+
+      .book-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+      }
+
+      .modal-content {
+        margin: 1rem;
+        padding: 1.5rem;
       }
 
       .auth-buttons {
         flex-direction: column;
       }
+    }
 
-      .user-menu {
-        flex-direction: column;
-        gap: 10px;
+    @media (max-width: 480px) {
+      .app-header {
+        padding: 1.5rem 1rem;
+      }
+
+      .app-header h1 {
+        font-size: 1.75rem;
+      }
+
+      .book-card {
+        padding: 1.25rem;
       }
     }
   </style>
@@ -459,26 +782,53 @@
     const SearchBar = ({ onSearch }) => {
       // 使用React的useState Hook
       const [query, setQuery] = React.useState('');
+      const [location, setLocation] = React.useState(''); // 添加馆藏地筛选状态
 
       const handleSubmit = (e) => {
         e.preventDefault();
-        onSearch(query);
+        onSearch(query, location); // 传递查询和馆藏地参数
       }
 
+      // 馆藏地选项
+      const locationOptions = [
+        { value: '', label: '全部馆藏地' },
+        { value: '鼓楼', label: '鼓楼校区' },
+        { value: '仙林', label: '仙林校区' },
+        { value: '浦口', label: '浦口校区' },
+        { value: '苏州', label: '苏州校区' }
+      ];
+
       // 使用React.createElement替代JSX
-      return React.createElement('form', { className: 'search-form', onSubmit: handleSubmit },
-        React.createElement('div', { className: 'search-input-container' },
-          React.createElement('input', {
-            type: 'text',
-            className: 'search-input',
-            placeholder: '请输入书名...',
-            value: query,
-            onChange: (e) => setQuery(e.target.value),
-            autoComplete: 'off'
-          }),
-          React.createElement('button', { type: 'submit', className: 'search-button' },
-            // SVG图标使用简单的文字替代
-            '搜索'
+      return React.createElement('section', { className: 'search-section' },
+        React.createElement('form', { className: 'search-form', onSubmit: handleSubmit },
+          React.createElement('div', { className: 'search-input-container' },
+            React.createElement('div', { className: 'search-input-wrapper' },
+              React.createElement('input', {
+                type: 'text',
+                className: 'search-input',
+                placeholder: '请输入书名...',
+                value: query,
+                onChange: (e) => setQuery(e.target.value),
+                autoComplete: 'off'
+              }),
+              React.createElement('i', { className: 'fas fa-search search-input-icon' })
+            ),
+            React.createElement('div', { className: 'location-select-wrapper' },
+              React.createElement('select', {
+                className: 'location-select',
+                value: location,
+                onChange: (e) => setLocation(e.target.value)
+              },
+                locationOptions.map(option => React.createElement('option', {
+                  key: option.value,
+                  value: option.value
+                }, option.label))
+              )
+            ),
+            React.createElement('button', { type: 'submit', className: 'search-button' },
+              React.createElement('i', { className: 'fas fa-search mr-2' }),
+              '搜索'
+            )
           )
         )
       );
@@ -494,6 +844,12 @@
         return 'status-unknown';
       }
 
+      const getStatusIcon = (status) => {
+        if (status && status.includes('可借')) return 'fas fa-check-circle';
+        if (status && status.includes('借出')) return 'fas fa-times-circle';
+        return 'fas fa-question-circle';
+      }
+
       // 使用React.createElement替代JSX
       return React.createElement('div', { className: 'book-card' },
         React.createElement('div', { className: 'book-card-header' },
@@ -501,24 +857,62 @@
         ),
 
         React.createElement('div', { className: 'book-card-content' },
-          React.createElement('p', { className: 'book-author' }, `作者: ${author || '未知'}`),
-          React.createElement('p', { className: 'book-publisher' }, `出版社: ${publisher || '未知'} ${year || ''}`),
+          React.createElement('p', { className: 'book-author' },
+            React.createElement('i', { className: 'fas fa-user' }),
+            `作者: ${author || '未知'}`
+          ),
+          React.createElement('p', { className: 'book-publisher' },
+            React.createElement('i', { className: 'fas fa-building' }),
+            `出版社: ${publisher || '未知'} ${year || ''}`
+          ),
 
           holdings && holdings.length > 0 ?
             React.createElement('div', { className: 'book-holdings' },
-              React.createElement('h4', null, '物理馆藏信息：'),
+              React.createElement('h4', null,
+                React.createElement('i', { className: 'fas fa-book' }),
+                '物理馆藏信息'
+              ),
               holdings.map((holding, idx) =>
                 React.createElement('div', { key: idx, className: 'holding-item' },
-                  React.createElement('p', null, `索书号: ${holding.callNumber || '未知'}`),
-                  React.createElement('p', null, `馆藏地: ${holding.location || '未知'}`),
-                  React.createElement('p', null,
-                    `状态: `,
-                    React.createElement('span', { className: `book-status ${getStatusColor(holding.status)}` }, holding.status || '未知状态')
+                  React.createElement('div', { className: 'holding-info-row' },
+                    React.createElement('div', { className: 'holding-info-item' },
+                      React.createElement('div', { className: 'holding-info-label' },
+                        React.createElement('i', { className: 'fas fa-hashtag' }),
+                        '索书号'
+                      ),
+                      React.createElement('div', { className: 'holding-info-value' },
+                        holding.callNumber || '未知'
+                      )
+                    ),
+                    React.createElement('div', { className: 'holding-info-item' },
+                      React.createElement('div', { className: 'holding-info-label' },
+                        React.createElement('i', { className: 'fas fa-map-marker-alt' }),
+                        '馆藏地'
+                      ),
+                      React.createElement('div', { className: 'holding-info-value' },
+                        holding.location || '未知'
+                      )
+                    )
+                  ),
+                  React.createElement('div', { className: 'holding-status-row' },
+                    React.createElement('div', { className: 'holding-info-label' },
+                      React.createElement('i', { className: 'fas fa-info-circle' }),
+                      '状态'
+                    ),
+                    React.createElement('div', { className: 'holding-info-value' },
+                      React.createElement('span', { className: `book-status ${getStatusColor(holding.status)}` },
+                        React.createElement('i', { className: getStatusIcon(holding.status) }),
+                        holding.status || '未知状态'
+                      )
+                    )
                   )
                 )
               )
             ) :
-            React.createElement('p', { className: 'no-holdings' }, '暂无馆藏信息')
+            React.createElement('p', { className: 'no-holdings' },
+              React.createElement('i', { className: 'fas fa-exclamation-circle' }),
+              '暂无馆藏信息'
+            )
         )
       );
     }
@@ -580,122 +974,99 @@
           const data = await response.json();
 
           if (!response.ok) {
-            throw new Error(data.message || '认证失败');
+            throw new Error(data.error || data.message || '认证失败');
+          }
+
+          // 获取token（处理登录和注册两种情况）
+          const token = data.access_token || data.token;
+          if (!token) {
+            throw new Error('认证失败：未返回token');
           }
 
           // 保存用户信息和token
           setUser(data.user);
-          setToken(data.token);
+          setToken(token);
           setCampus(data.user.campus);
           localStorage.setItem('user', JSON.stringify(data.user));
-          localStorage.setItem('token', data.token);
+          localStorage.setItem('token', token);
 
           // 获取搜索历史
-          fetchSearchHistory(data.token);
+          fetchSearchHistory(token);
 
           // 关闭模态框
           setShowAuthModal(false);
         } catch (err) {
           setAuthError(err.message);
         }
-      };
-
-      // 登出处理
-      const handleLogout = () => {
-        setUser(null);
-        setToken(null);
-        setCampus('');
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-        setSearchHistory([]);
-      };
-
-      // 更新校区
-      const handleCampusChange = async (e) => {
-        const newCampus = e.target.value;
-        setCampus(newCampus);
-
-        if (user && token) {
-          try {
-            const response = await fetch('http://localhost:5000/api/set-campus', {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-              },
-              body: JSON.stringify({ campus: newCampus })
-            });
-
-            if (response.ok) {
-              const updatedUser = { ...user, campus: newCampus };
-              setUser(updatedUser);
-              localStorage.setItem('user', JSON.stringify(updatedUser));
-            }
-          } catch (err) {
-            console.error('更新校区失败:', err);
-          }
-        }
-      };
+      }
 
       // 获取搜索历史
-      const fetchSearchHistory = async (authToken) => {
+      const fetchSearchHistory = async (token) => {
         try {
-          const response = await fetch('http://localhost:5000/api/search-history', {
+          const response = await fetch('http://localhost:5000/api/search/history', {
             headers: {
-              'Authorization': `Bearer ${authToken}`
+              'Authorization': `Bearer ${token}`
             }
           });
 
-          if (response.ok) {
-            const data = await response.json();
-            setSearchHistory(data);
+          if (!response.ok) {
+            throw new Error('获取搜索历史失败');
           }
+
+          const data = await response.json();
+          setSearchHistory(data.history);
         } catch (err) {
           console.error('获取搜索历史失败:', err);
+          setSearchHistory([]);
         }
-      };
+      }
 
-      // 搜索处理
+      // 搜索功能
       const handleSearch = async (query) => {
         if (!query.trim()) return;
 
         setLoading(true);
         setError(null);
+        setBooks([]);
 
         try {
-          // 构建请求头
-          const headers = {};
-          if (token) {
-            headers.Authorization = `Bearer ${token}`;
+          if (!token) {
+            // 如果没有登录，显示登录模态框
+            setShowAuthModal(true);
+            setLoading(false);
+            return;
           }
 
-          // 直接调用后端服务地址
+          // 直接调用后端服务地址，添加认证token
           const response = await fetch(`http://localhost:5000/api/search?query=${encodeURIComponent(query)}`, {
-            headers: headers
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
           });
 
-          if (!response.ok) throw new Error('搜索失败');
+          if (!response.ok) {
+            throw new Error('搜索失败');
+          }
 
           const data = await response.json();
           setBooks(data);
-
-          // 更新搜索历史
-          if (token) {
-            fetchSearchHistory(token);
-          }
         } catch (err) {
           setError(err.message);
           setBooks([]);
         } finally {
           setLoading(false);
         }
-      };
+      }
 
-      // 从历史记录重新搜索
-      const searchFromHistory = (keyword) => {
-        handleSearch(keyword);
-        setShowHistory(false);
-      };
+      // 注销功能
+      const handleLogout = () => {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        setUser(null);
+        setToken(null);
+        setBooks([]);
+        setSearchHistory([]);
+      }
 
       // 渲染认证模态框
       const renderAuthModal = () => {
@@ -704,7 +1075,10 @@
         return React.createElement('div', { className: 'modal-overlay' },
           React.createElement('div', { className: 'modal-content' },
             React.createElement('div', { className: 'modal-header' },
-              React.createElement('h2', { className: 'modal-title' }, isLogin ? '登录' : '注册'),
+              React.createElement('h2', { className: 'modal-title' },
+                React.createElement('i', { className: isLogin ? 'fas fa-sign-in-alt' : 'fas fa-user-plus' }),
+                ` ${isLogin ? '登录' : '注册'}`
+              ),
               React.createElement('button', {
                 className: 'modal-close',
                 onClick: () => setShowAuthModal(false)
@@ -712,23 +1086,29 @@
             ),
 
             React.createElement('form', { onSubmit: handleAuth },
-              authError && React.createElement('div', { className: 'error' }, authError),
+              authError && React.createElement('div', { className: 'error' },
+                React.createElement('i', { className: 'fas fa-exclamation-triangle' }),
+                React.createElement('p', null, authError)
+              ),
 
               React.createElement('div', { className: 'form-group' },
-                React.createElement('label', { className: 'form-label' }, '用户名'),
+                React.createElement('label', { className: 'form-label', htmlFor: 'username' }, '用户名'),
                 React.createElement('input', {
                   type: 'text',
+                  id: 'username',
                   className: 'form-input',
                   value: username,
                   onChange: (e) => setUsername(e.target.value),
-                  required: true
+                  required: true,
+                  autoFocus: true
                 })
               ),
 
               React.createElement('div', { className: 'form-group' },
-                React.createElement('label', { className: 'form-label' }, '密码'),
+                React.createElement('label', { className: 'form-label', htmlFor: 'password' }, '密码'),
                 React.createElement('input', {
                   type: 'password',
+                  id: 'password',
                   className: 'form-input',
                   value: password,
                   onChange: (e) => setPassword(e.target.value),
@@ -737,40 +1117,36 @@
               ),
 
               !isLogin && React.createElement('div', { className: 'form-group' },
-                React.createElement('label', { className: 'form-label' }, '校区'),
-                React.createElement('select', {
+                React.createElement('label', { className: 'form-label', htmlFor: 'campus' }, '校区'),
+                React.createElement('input', {
+                  type: 'text',
+                  id: 'campus',
                   className: 'form-input',
                   value: campus,
                   onChange: (e) => setCampus(e.target.value),
+                  placeholder: '请输入校区（如：鼓楼、仙林）',
                   required: true
-                },
-                  React.createElement('option', { value: '' }, '请选择校区'),
-                  React.createElement('option', { value: '鼓楼' }, '鼓楼校区'),
-                  React.createElement('option', { value: '仙林' }, '仙林校区'),
-                  React.createElement('option', { value: '浦口' }, '浦口校区'),
-                  React.createElement('option', { value: '苏州' }, '苏州校区')
-                )
+                })
               ),
 
               React.createElement('button', { type: 'submit', className: 'form-button' },
-                isLogin ? '登录' : '注册'
+                React.createElement('i', { className: isLogin ? 'fas fa-sign-in-alt' : 'fas fa-user-plus' }),
+                ` ${isLogin ? '登录' : '注册'}`
               ),
 
               React.createElement('div', { className: 'form-toggle' },
-                isLogin ?
-                  React.createElement('span', null,
-                    '还没有账号？ ',
-                    React.createElement('a', { onClick: () => setIsLogin(false) }, '立即注册')
-                  ) :
-                  React.createElement('span', null,
-                    '已有账号？ ',
-                    React.createElement('a', { onClick: () => setIsLogin(true) }, '立即登录')
-                  )
+                React.createElement('span', null, isLogin ? '还没有账号？' : '已有账号？'),
+                React.createElement('a', {
+                  onClick: () => {
+                    setIsLogin(!isLogin);
+                    setAuthError(null);
+                  }
+                }, isLogin ? '注册新账号' : '登录现有账号')
               )
             )
           )
         );
-      };
+      }
 
       // 渲染搜索历史模态框
       const renderHistoryModal = () => {
@@ -779,121 +1155,131 @@
         return React.createElement('div', { className: 'modal-overlay' },
           React.createElement('div', { className: 'modal-content' },
             React.createElement('div', { className: 'modal-header' },
-              React.createElement('h2', { className: 'modal-title' }, '搜索历史'),
+              React.createElement('h2', { className: 'modal-title' },
+                React.createElement('i', { className: 'fas fa-history' }),
+                ' 搜索历史'
+              ),
               React.createElement('button', {
                 className: 'modal-close',
                 onClick: () => setShowHistory(false)
               }, '×')
             ),
 
-            searchHistory.length > 0 ?
-              searchHistory.map((item, index) =>
-                React.createElement('div', { key: index, className: 'history-item' },
-                  React.createElement('div', null,
-                    React.createElement('div', { className: 'history-keyword' }, item.query),
-                    React.createElement('div', { className: 'history-date' }, new Date(item.search_time).toLocaleString())
-                  ),
+            React.createElement('div', { className: 'modal-body' },
+              searchHistory.length === 0 ? React.createElement('div', { className: 'empty' },
+                React.createElement('i', { className: 'fas fa-history' }),
+                React.createElement('p', null, '暂无搜索历史')
+              ) : React.createElement('div', { className: 'history-list' },
+                searchHistory.map((item, index) => React.createElement('div', { key: index, className: 'history-item' },
+                  React.createElement('div', { className: 'history-keyword' }, item.query),
+                  React.createElement('div', { className: 'history-date' }, new Date(item.search_time).toLocaleString()),
                   React.createElement('div', { className: 'history-actions' },
                     React.createElement('button', {
                       className: 'history-button',
-                      onClick: () => searchFromHistory(item.query)
-                    }, '重新搜索')
+                      onClick: () => {
+                        handleSearch(item.query);
+                        setShowHistory(false);
+                      }
+                    }, '搜索')
                   )
-                )
-              ) :
-              React.createElement('p', { className: 'empty' }, '暂无搜索历史')
+                ))
+              )
+            )
           )
         );
-      };
+      }
 
       // 使用React.createElement替代JSX
       return React.createElement('div', { className: 'app' },
+        // 顶部导航栏
         React.createElement('header', { className: 'app-header' },
           React.createElement('h1', null, '南京大学图书馆检索系统'),
           React.createElement('p', null, '快速查找图书馆馆藏图书'),
 
-          // 用户认证按钮或用户信息
-          user ?
-            React.createElement('div', { className: 'user-menu' },
-              React.createElement('span', { className: 'user-info' }, `欢迎, ${user.username}`),
-              React.createElement('button', {
-                className: 'auth-button',
-                onClick: () => setShowHistory(true)
-              }, '搜索历史'),
-              React.createElement('button', {
-                className: 'logout-button',
-                onClick: handleLogout
-              }, '退出登录')
-            ) :
-            React.createElement('div', { className: 'auth-buttons' },
-              React.createElement('button', {
-                className: 'auth-button',
-                onClick: () => { setIsLogin(true); setShowAuthModal(true); }
-              }, '登录'),
-              React.createElement('button', {
-                className: 'auth-button',
-                onClick: () => { setIsLogin(false); setShowAuthModal(true); }
-              }, '注册')
+          token ? React.createElement('div', { className: 'auth-buttons' },
+            React.createElement('button', {
+              className: 'auth-button',
+              onClick: () => setShowHistory(true)
+            },
+              React.createElement('i', { className: 'fas fa-history' }),
+              ' 搜索历史'
+            ),
+            React.createElement('button', {
+              className: 'auth-button auth-button-primary',
+              onClick: handleLogout
+            },
+              React.createElement('i', { className: 'fas fa-sign-out-alt' }),
+              ' 退出登录'
             )
-        ),
-
-        user && React.createElement('div', { className: 'campus-selector' },
-          React.createElement('select', { value: campus, onChange: handleCampusChange },
-            React.createElement('option', { value: '鼓楼' }, '鼓楼校区'),
-            React.createElement('option', { value: '仙林' }, '仙林校区'),
-            React.createElement('option', { value: '浦口' }, '浦口校区'),
-            React.createElement('option', { value: '苏州' }, '苏州校区')
+          ) : React.createElement('div', { className: 'auth-buttons' },
+            React.createElement('button', {
+              className: 'auth-button',
+              onClick: () => {
+                setIsLogin(true);
+                setShowAuthModal(true);
+              }
+            },
+              React.createElement('i', { className: 'fas fa-sign-in-alt' }),
+              ' 登录'
+            ),
+            React.createElement('button', {
+              className: 'auth-button auth-button-primary',
+              onClick: () => {
+                setIsLogin(false);
+                setShowAuthModal(true);
+              }
+            },
+              React.createElement('i', { className: 'fas fa-user-plus' }),
+              ' 注册'
+            )
           )
         ),
 
+        // 主要内容区
         React.createElement('main', { className: 'app-main' },
           React.createElement(SearchBar, { onSearch: handleSearch }),
 
-          loading ?
-            React.createElement('div', { className: 'loading' },
-              React.createElement('p', null, '正在搜索中...')
-            ) : null,
+          loading ? React.createElement('div', { className: 'loading' },
+            React.createElement('i', { className: 'fas fa-spinner fa-spin' }),
+            React.createElement('p', null, '正在搜索中...')
+          ) : null,
 
-          error ?
-            React.createElement('div', { className: 'error' },
-              React.createElement('p', null, error)
-            ) : null,
+          error ? React.createElement('div', { className: 'error' },
+            React.createElement('i', { className: 'fas fa-exclamation-triangle' }),
+            React.createElement('p', null, error)
+          ) : null,
 
-          !loading && !error && books.length === 0 ?
-            React.createElement('div', { className: 'empty' },
-              React.createElement('p', null, '请输入书名进行搜索')
-            ) : null,
+          !loading && !error && books.length === 0 ? React.createElement('div', { className: 'empty' },
+            React.createElement('i', { className: 'fas fa-search' }),
+            React.createElement('p', null, '请输入书名进行搜索')
+          ) : null,
 
-          books.length > 0 ?
+          books.length > 0 ? React.createElement('section', { className: 'books-container' },
             React.createElement('div', { className: 'book-grid' },
               books.map((book, index) =>
                 React.createElement(BookCard, { key: index, book: book })
               )
-            ) : null
+            )
+          ) : null
         ),
 
+        // 页脚
         React.createElement('footer', { className: 'app-footer' },
-          React.createElement('p', null, '© 2024 南京大学图书馆检索系统')
+          React.createElement('p', null, '南京大学图书馆检索系统 © 2024'),
+          React.createElement('p', null, '提供便捷的图书查询服务')
         ),
 
-        // 模态框
+        // 认证模态框
         renderAuthModal(),
+
+        // 搜索历史模态框
         renderHistoryModal()
       );
     }
 
-    // 使用CDN版本的React
-    const { createRoot } = ReactDOM;
-
-    // 创建根节点并渲染应用
-    const [您的服务器用户名] = createRoot(document.getElementById('[您的服务器用户名]'));
-
-    // 使用React.StrictMode渲染App组件
-    [您的服务器用户名].render(
-      React.createElement(React.StrictMode, null,
-        React.createElement(App)
-      )
-    );
+    // 使用React 18的新API渲染根组件
+    const [您的服务器用户名] = ReactDOM.createRoot(document.getElementById('[您的服务器用户名]'));
+    [您的服务器用户名].render(React.createElement(App));
   </script>
 </body>
 

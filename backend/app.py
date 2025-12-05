@@ -77,6 +77,8 @@ logger.info('南京大学图书馆OPAC爬虫初始化完成')
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
+# 暂时移除测试路由，避免可能的路由冲突
+
 @app.route('/api/register', methods=['POST'])
 def register():
     try:
@@ -85,13 +87,19 @@ def register():
         password = data.get('password')
         campus = data.get('campus')
         
+        print(f"\n=== 注册请求调试信息 ===")
+        print(f"原始请求数据: {data}")
+        print(f"username: {username}")
+        print(f"password: {'***' if password else 'None'}")
+        print(f"campus: '{campus}'")
+        
         if not username or not password:
             return jsonify({'error': '用户名和密码不能为空'}), 400
             
-        # 检查校区是否有效
-        valid_campuses = ['鼓楼', '仙林', '浦口', '苏州']
-        if campus and campus not in valid_campuses:
-            return jsonify({'error': '无效的校区'}), 400
+        # 完全移除校区验证，直接处理注册
+        print("校区验证已完全移除，继续处理注册...")
+        
+        # 不修改campus值，直接使用接收到的内容
             
         # 加密密码
         hashed_password = hash_password(password)
@@ -102,8 +110,12 @@ def register():
         # 获取刚创建的用户信息
         user = db.get_user(username)
         
+        # 创建访问令牌
+        access_token = create_access_token(identity=str(user[0]))
+        
         return jsonify({
             'message': '注册成功',
+            'access_token': access_token,
             'user': {
                 'id': user[0],
                 'username': user[1],
@@ -174,20 +186,7 @@ def set_campus():
         logger.error(f"校区设置失败: {str(e)}")
         return jsonify({'error': str(e)}), 400
 
-@app.route('/api/user/campus', methods=['GET'])
-@jwt_required()
-def get_campus():
-    try:
-        user_id = get_jwt_identity()
-        
-        # 获取用户信息
-        user = db.get_user_by_id(int(user_id))
-        
-        return jsonify({'campus': user[3]})
-        
-    except Exception as e:
-        logger.error(f"获取校区失败: {str(e)}")
-        return jsonify({'error': str(e)}), 400
+# 移除重复的路由定义
 
 @app.route('/api/search', methods=['GET'])
 @jwt_required(optional=True)  # 使用optional=True允许未登录用户访问
@@ -207,7 +206,8 @@ def search_books():
         
         # 获取查询参数
         query = request.args.get('query', '')
-        logger.info(f"收到搜索请求: query={query}, user_id={user_id}")
+        location = request.args.get('location', '')  # 获取馆藏地筛选参数
+        logger.info(f"收到搜索请求: query={query}, location={location}, user_id={user_id}")
         
         if not query:
             logger.warning("搜索关键词为空")
@@ -236,7 +236,23 @@ def search_books():
         
         # 如果用户已登录，记录搜索历史
         if user_id:
-            db.add_search_history(int(user_id), query)
+            db.add_search_history(int(user_id), query, location)
+        
+        # 根据馆藏地筛选图书
+        if location:
+            filtered_books = []
+            for book in books:
+                if book.get('holdings'):
+                    # 筛选出包含指定馆藏地的图书
+                    filtered_holdings = [holding for holding in book['holdings'] 
+                                        if holding.get('location') and location in holding['location']]
+                    if filtered_holdings:
+                        # 如果有符合条件的馆藏，保留这本书并只显示符合条件的馆藏
+                        filtered_book = book.copy()
+                        filtered_book['holdings'] = filtered_holdings
+                        filtered_books.append(filtered_book)
+            books = filtered_books
+            logger.info(f"馆藏地筛选完成，返回图书数量: {len(books)}")
         
         logger.info(f"搜索完成，返回图书数量: {len(books)}")
         return jsonify(books)
@@ -274,6 +290,8 @@ def set_campus_new():
         logger.error(f"更新校区设置失败: {e}")
         return jsonify({'error': '更新校区设置失败'}), 500
 
+# 已移除重复的路由定义
+
 @app.route('/api/search-history', methods=['GET'])
 @jwt_required()
 def get_search_history():
@@ -283,11 +301,61 @@ def get_search_history():
         # 获取搜索历史
         history = db.get_search_history(int(user_id))
         
-        return jsonify(history)
+        return jsonify({'history': history})
         
     except Exception as e:
         logger.error(f"获取搜索历史失败: {str(e)}")
         return jsonify({'error': str(e)}), 400
+
+# @app.route('/api/search/history', methods=['GET'])  # 重复路径，已注释
+# @jwt_required()
+# def get_search_history_alt():
+#     """兼容前端的搜索历史API路径"""
+#     return get_search_history()
+
+@app.route('/api/search-history/<int:history_id>', methods=['DELETE'])
+@jwt_required()
+def delete_search_history(history_id):
+    try:
+        user_id = get_jwt_identity()
+        
+        # 删除单条搜索历史记录
+        db.delete_search_history(int(user_id), history_id)
+        
+        return jsonify({'message': '搜索历史记录已删除'})
+        
+    except Exception as e:
+        logger.error(f"删除搜索历史记录失败: {str(e)}")
+        return jsonify({'error': str(e)}), 400
+
+@app.route('/api/search-history', methods=['DELETE'])
+@jwt_required()
+def clear_search_history():
+    try:
+        user_id = get_jwt_identity()
+        
+        # 清空所有搜索历史记录
+        db.clear_search_history(int(user_id))
+        
+        return jsonify({'message': '所有搜索历史记录已清空'})
+        
+    except Exception as e:
+        logger.error(f"清空搜索历史记录失败: {str(e)}")
+        return jsonify({'error': str(e)}), 400
+
+@app.route('/api/user/campus', methods=['GET'])
+@jwt_required()
+def get_user_campus():
+    """获取用户校区设置"""
+    try:
+        user_id = get_jwt_identity()
+        user = db.get_user_by_id(int(user_id))
+        if user:
+            return jsonify({'campus': user[3]})
+        return jsonify({'campus': None}), 404
+    except Exception as e:
+        logger.error(f"获取用户校区失败: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/test', methods=['GET'])
 def test_api():
@@ -299,4 +367,4 @@ def test():
 
 if __name__ == '__main__':
     # 开启debug模式以获取详细错误信息
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='127.0.0.1', port=5001, debug=False)

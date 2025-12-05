@@ -1,9 +1,0 @@
-<!doctype html><html lang=cn><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>统一检索</title><script type=text/javascript src=https://static12.libsp.com/static/jquery.min.js></script><script type=text/javascript src=https://static12.libsp.com/static/js/highstock.js></script><script type=text/javascript src=https://static12.libsp.com/static/js/highstockdata.js></script><script type=text/javascript src=https://static12.libsp.com/static/js/exporting_highstock.js></script><script type=text/javascript src=https://static12.libsp.com/static/js/drawpic.js></script><script type=text/javascript>window.bookCoverImgList = {};
-    window.callback = function (data) {
-      const url = (data[0] || {}).url || '';
-      window.ebookHref = url;
-    }
-    window.getBookCover = function (data) {
-      const url = (data[0] || {}).src || '';
-      window.bookImg = url;
-    }</script><script src=https://staticcdn12.libsp.com/static/dll/vendor.dll.js></script><lin...

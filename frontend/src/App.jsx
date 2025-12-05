@@ -1,9 +1,15 @@
 // 全局App组件函数
+import React from 'react';
+import SearchBar from './components/SearchBar';
+import BookCard from './components/BookCard';
 function App() {
+  // 将App组件导出到全局作用域
+  window.App = App;
   // 使用React的useState Hook
   const [books, setBooks] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState(null);
+  const [hasSearched, setHasSearched] = React.useState(false);
   // 用户认证状态
   const [user, setUser] = React.useState(null);
   const [token, setToken] = React.useState(localStorage.getItem('token'));
@@ -24,16 +30,37 @@ function App() {
   // 获取用户信息
   const fetchUserInfo = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/user/campus', {
+      const response = await fetch('/api/user/campus', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
+
       if (response.ok) {
-        const data = await response.json();
-        // 从token中提取用户信息（简化处理）
-        setUser({ campus: data.campus });
+        let responseText;
+        try {
+          responseText = await response.text();
+
+          if (responseText) {
+            try {
+              const data = JSON.parse(responseText);
+              // 从token中提取用户信息（简化处理）
+              setUser({ campus: data.campus });
+              return;
+            } catch (jsonError) {
+              console.error('JSON解析错误:', jsonError);
+            }
+          }
+        } catch (textError) {
+          console.error('获取响应文本失败:', textError);
+        }
       }
+
+      // 如果响应不成功或解析失败，清除token和user
+      console.log('获取用户信息失败，清除认证状态');
+      localStorage.removeItem('token');
+      setToken(null);
+      setUser(null);
     } catch (err) {
       console.error('获取用户信息失败:', err);
       // 清除无效的token
@@ -47,15 +74,34 @@ function App() {
   const fetchSearchHistory = async () => {
     if (!token) return;
     try {
-      const response = await fetch('http://localhost:5000/api/search/history', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await fetch('/api/search-history', { headers: { 'Authorization': `Bearer ${token}` } });
+
       if (response.ok) {
-        const data = await response.json();
-        setSearchHistory(data.history);
+        let responseText;
+        try {
+          responseText = await response.text();
+
+          if (responseText) {
+            try {
+              const data = JSON.parse(responseText);
+              // 处理时间格式，确保可以被正确解析
+              const processedHistory = data.history.map(item => ({
+                ...item,
+                // 确保search_time格式正确，兼容不同的时间字符串格式
+                search_time: typeof item.search_time === 'string' ? item.search_time : item.search_time.toISOString()
+              }));
+              setSearchHistory(processedHistory);
+              return;
+            } catch (jsonError) {
+              console.error('JSON解析错误:', jsonError);
+            }
+          }
+        } catch (textError) {
+          console.error('获取响应文本失败:', textError);
+        }
       }
+
+      console.log('获取搜索历史失败');
     } catch (err) {
       console.error('获取搜索历史失败:', err);
     }
@@ -64,19 +110,48 @@ function App() {
   // 用户注册
   const handleRegister = async (username, password, campus) => {
     try {
-      const response = await fetch('http://localhost:5000/api/register', {
+      const response = await fetch('/api/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ username, password, campus })
       });
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || '注册失败');
+
+      let errorMessage = '注册失败';
+
+      // 尝试解析响应内容
+      let responseText;
+      try {
+        responseText = await response.text();
+
+        if (responseText) {
+          try {
+            const data = JSON.parse(responseText);
+            errorMessage = data.error || errorMessage;
+          } catch (jsonError) {
+            // 不是有效的JSON格式
+            errorMessage = `服务器返回错误: ${responseText}`;
+          }
+        }
+      } catch (textError) {
+        // 无法获取响应文本
+        errorMessage = `网络错误: ${textError.message}`;
       }
-      // 注册成功后自动登录
-      return handleLogin(username, password);
+
+      if (!response.ok) {
+        throw new Error(errorMessage);
+      }
+
+      // 响应成功，解析JSON
+      const data = JSON.parse(responseText);
+      setToken(data.access_token);
+      setUser(data.user);
+      localStorage.setItem('token', data.access_token);
+      // 获取搜索历史
+      fetchSearchHistory();
+      setShowAuthModal(false);
+      return true;
     } catch (err) {
       alert(err.message);
       return false;
@@ -86,18 +161,41 @@ function App() {
   // 用户登录
   const handleLogin = async (username, password) => {
     try {
-      const response = await fetch('http://localhost:5000/api/login', {
+      const response = await fetch('/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ username, password })
       });
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || '登录失败');
+
+      let errorMessage = '登录失败';
+
+      // 尝试解析响应内容
+      let responseText;
+      try {
+        responseText = await response.text();
+
+        if (responseText) {
+          try {
+            const data = JSON.parse(responseText);
+            errorMessage = data.error || errorMessage;
+          } catch (jsonError) {
+            // 不是有效的JSON格式
+            errorMessage = `服务器返回错误: ${responseText}`;
+          }
+        }
+      } catch (textError) {
+        // 无法获取响应文本
+        errorMessage = `网络错误: ${textError.message}`;
       }
-      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(errorMessage);
+      }
+
+      // 响应成功，解析JSON
+      const data = JSON.parse(responseText);
       setToken(data.access_token);
       setUser(data.user);
       localStorage.setItem('token', data.access_token);
@@ -121,9 +219,15 @@ function App() {
 
   // 设置校区
   const handleSetCampus = async (campus) => {
-    if (!token) return;
+    console.log('handleSetCampus called with:', campus);
+    console.log('Current token:', token);
+    if (!token) {
+      console.log('No token available');
+      return;
+    }
     try {
-      const response = await fetch('http://localhost:5000/api/user/campus', {
+      console.log('Sending request to /api/user/campus');
+      const response = await fetch('/api/user/campus', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -131,22 +235,50 @@ function App() {
         },
         body: JSON.stringify({ campus })
       });
+      console.log('Response status:', response.status);
+
+      let errorMessage = '校区设置失败';
+
+      // 尝试解析响应内容
+      let responseText;
+      try {
+        responseText = await response.text();
+
+        if (responseText) {
+          try {
+            const data = JSON.parse(responseText);
+            errorMessage = data.error || errorMessage;
+          } catch (jsonError) {
+            // 不是有效的JSON格式
+            errorMessage = `服务器返回错误: ${responseText}`;
+          }
+        }
+      } catch (textError) {
+        // 无法获取响应文本
+        errorMessage = `网络错误: ${textError.message}`;
+      }
+
       if (response.ok) {
+        console.log('Campus update successful, updating local state');
         setUser(prev => ({ ...prev, campus }));
         alert('校区设置成功');
+      } else {
+        console.log('Campus update failed:', errorMessage);
+        alert(errorMessage);
       }
     } catch (err) {
       console.error('设置校区失败:', err);
-      alert('设置校区失败');
+      alert('设置校区失败: ' + err.message);
     }
   };
 
   // 搜索功能
-  const handleSearch = async (query) => {
+  const handleSearch = async (query, location) => {
     if (!query.trim()) return;
 
     setLoading(true);
     setError(null);
+    setHasSearched(true);
 
     try {
       if (!token) {
@@ -156,16 +288,43 @@ function App() {
         return;
       }
 
-      // 直接调用后端服务地址，添加认证token
-      const response = await fetch(`http://localhost:5000/api/search?query=${encodeURIComponent(query)}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      if (!response.ok) throw new Error('搜索失败');
+      // 构建URL，添加查询参数
+      let url = `/api/search?query=${encodeURIComponent(query)}`;
+      if (location) {
+        url += `&location=${encodeURIComponent(location)}`;
+      }
 
-      const data = await response.json();
-      setBooks(data);
+      // 直接调用后端服务地址，添加认证token
+      const response = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+
+      if (!response.ok) {
+        throw new Error('搜索失败');
+      }
+
+      let responseText;
+      let data = [];
+
+      try {
+        responseText = await response.text();
+
+        if (responseText) {
+          try {
+            data = JSON.parse(responseText);
+          } catch (jsonError) {
+            console.error('JSON解析错误:', jsonError);
+            throw new Error('搜索结果解析失败');
+          }
+        }
+      } catch (textError) {
+        console.error('获取响应文本失败:', textError);
+        throw new Error('搜索结果获取失败');
+      }
+
+      // 直接使用后端返回的图书数组（而不是data.books）
+      setBooks(Array.isArray(data) ? data : []);
+
+      // 搜索历史由后端自动记录，不再需要前端单独保存
+
       // 更新搜索历史
       fetchSearchHistory();
     } catch (err) {
@@ -187,7 +346,8 @@ function App() {
       if (authMode === 'login') {
         handleLogin(username, password);
       } else {
-        handleRegister(username, password, campus);
+        // 如果campus为空字符串，则发送null
+        handleRegister(username, password, campus || null);
       }
     };
 
@@ -281,7 +441,7 @@ function App() {
       React.createElement('div', { className: 'campus-options' },
         campuses.map(campus => React.createElement('button', {
           key: campus,
-          className: `campus-option ${user.campus === campus ? 'active' : ''}`,
+          className: `campus-option ${user && user.campus === campus ? 'active' : ''}`,
           onClick: () => handleSetCampus(campus)
         }, campus))
       )
@@ -300,7 +460,7 @@ function App() {
 
         // 用户菜单
         React.createElement('div', { className: 'header-user' },
-          token ? React.createElement('div', { className: 'user-menu' },
+          token && user ? React.createElement('div', { className: 'user-menu' },
             React.createElement('button', { className: 'btn-secondary', onClick: () => setShowHistoryModal(true) }, '搜索历史'),
             React.createElement('div', { className: 'user-info' },
               React.createElement('span', null, user.campus ? `校区: ${user.campus}` : '未设置校区'),
@@ -329,21 +489,37 @@ function App() {
 
     // 主要内容区
     React.createElement('main', { className: 'app-main' },
-      React.createElement(SearchBar, { onSearch: handleSearch }),
+      // 传递用户校区信息、搜索历史和token给SearchBar组件
+      React.createElement(SearchBar, {
+        onSearch: handleSearch,
+        userCampus: user?.campus,
+        searchHistory: searchHistory,
+        token: token,
+        onClearHistory: () => setSearchHistory([]),
+        onDeleteHistory: (historyId) => setSearchHistory(prev => prev.filter(item => item.id !== historyId))
+      }),
 
       loading ?
         React.createElement('div', { className: 'loading' },
+          React.createElement('div', { className: 'loading-spinner' }),
           React.createElement('p', null, '正在搜索中...')
         ) : null,
 
       error ?
         React.createElement('div', { className: 'error' },
+          React.createElement('div', { className: 'error-icon' },
+            React.createElement('i', { className: 'fas fa-exclamation-circle' })
+          ),
           React.createElement('p', null, error)
         ) : null,
 
-      !loading && !error && books.length === 0 ?
+      !loading && !error && hasSearched && books.length === 0 ?
         React.createElement('div', { className: 'empty' },
-          React.createElement('p', null, '请输入书名进行搜索')
+          React.createElement('div', { className: 'empty-icon' },
+            React.createElement('i', { className: 'fas fa-search' })
+          ),
+          React.createElement('h3', null, '未找到相关图书'),
+          React.createElement('p', null, '请尝试使用不同的关键词或调整馆藏地筛选条件')
         ) : null,
 
       books.length > 0 ?
@@ -354,10 +530,7 @@ function App() {
         ) : null
     ),
 
-    // 页脚
-    React.createElement('footer', { className: 'app-footer' },
-      React.createElement('p', null, '© 2024 南京大学图书馆检索系统')
-    ),
+
 
     // 认证模态框
     showAuthModal ? React.createElement(AuthModal) : null,
@@ -366,3 +539,5 @@ function App() {
     showHistoryModal ? React.createElement(HistoryModal) : null
   );
 }
+
+export default App;

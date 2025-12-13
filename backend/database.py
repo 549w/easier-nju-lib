@@ -31,7 +31,7 @@ class Database:
             raise
     
     def create_tables(self):
-        """创建用户表和搜索历史表"""
+        """创建用户表、搜索历史表和访问日志表"""
         try:
             # 创建用户表
             self.cursor.execute('''
@@ -54,6 +54,23 @@ class Database:
                     search_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (user_id) REFERENCES users (id),
                     UNIQUE(user_id, query, location) ON CONFLICT REPLACE
+                )
+            ''')
+            
+            # 创建访问日志表
+            self.cursor.execute('''
+                CREATE TABLE IF NOT EXISTS access_logs (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER,
+                    username TEXT DEFAULT NULL,
+                    ip_address TEXT NOT NULL,
+                    user_agent TEXT DEFAULT '',
+                    request_path TEXT NOT NULL,
+                    request_method TEXT DEFAULT 'GET',
+                    status_code INTEGER DEFAULT 200,
+                    access_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    ip_location TEXT DEFAULT '',
+                    FOREIGN KEY (user_id) REFERENCES users (id)
                 )
             ''')
             
@@ -186,6 +203,124 @@ class Database:
         except Exception as e:
             logger.error(f"清空搜索历史记录失败: {str(e)}")
             self.conn.rollback()
+            raise
+    
+    def add_access_log(self, user_id=None, username=None, ip_address='', user_agent='', 
+                      request_path='', request_method='GET', status_code=200, ip_location=''):
+        """添加访问日志记录"""
+        try:
+            # 简化IP属地功能，暂时不获取具体位置
+            ip_location = ''  # 默认空字符串
+            self.cursor.execute(
+                "INSERT INTO access_logs (user_id, username, ip_address, user_agent, "
+                "request_path, request_method, status_code, ip_location) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                (user_id, username, ip_address, user_agent, request_path, 
+                 request_method, status_code, ip_location)
+            )
+            self.conn.commit()
+            logger.info(f"访问日志记录添加成功: user_id={user_id}, username={username}, ip={ip_address}")
+            return True
+        except Exception as e:
+            logger.error(f"添加访问日志记录失败: {str(e)}")
+            self.conn.rollback()
+            raise
+    
+    def get_all_users(self):
+        """获取所有用户信息（不包含密码）"""
+        try:
+            self.cursor.execute(
+                "SELECT id, username, campus, created_at FROM users ORDER BY created_at DESC"
+            )
+            results = []
+            for row in self.cursor.fetchall():
+                results.append({
+                    'id': row[0],
+                    'username': row[1],
+                    'campus': row[2],
+                    'created_at': row[3]
+                })
+            return results
+        except Exception as e:
+            logger.error(f"获取所有用户信息失败: {str(e)}")
+            raise
+    
+    def get_all_access_logs(self, limit=1000):
+        """获取所有访问日志记录"""
+        try:
+            self.cursor.execute(
+                "SELECT id, user_id, username, ip_address, user_agent, request_path, "
+                "request_method, status_code, access_time, ip_location "
+                "FROM access_logs ORDER BY access_time DESC LIMIT ?",
+                (limit,)
+            )
+            results = []
+            for row in self.cursor.fetchall():
+                results.append({
+                    'id': row[0],
+                    'user_id': row[1],
+                    'username': row[2],
+                    'ip_address': row[3],
+                    'user_agent': row[4],
+                    'request_path': row[5],
+                    'request_method': row[6],
+                    'status_code': row[7],
+                    'access_time': row[8],
+                    'ip_location': row[9]
+                })
+            return results
+        except Exception as e:
+            logger.error(f"获取所有访问日志记录失败: {str(e)}")
+            raise
+    
+    def get_statistics(self):
+        """获取统计信息：账号总量、访问总量、搜索总量"""
+        try:
+            # 获取账号总量
+            self.cursor.execute("SELECT COUNT(*) FROM users")
+            user_count = self.cursor.fetchone()[0]
+            
+            # 获取访问总量
+            self.cursor.execute("SELECT COUNT(*) FROM access_logs")
+            access_count = self.cursor.fetchone()[0]
+            
+            # 获取搜索总量
+            self.cursor.execute("SELECT COUNT(*) FROM search_history")
+            search_count = self.cursor.fetchone()[0]
+            
+            return {
+                'user_count': user_count,
+                'access_count': access_count,
+                'search_count': search_count
+            }
+        except Exception as e:
+            logger.error(f"获取统计信息失败: {str(e)}")
+            raise
+    
+    def get_user_access_logs(self, user_id, limit=100):
+        """获取指定用户的访问日志记录"""
+        try:
+            self.cursor.execute(
+                "SELECT id, ip_address, user_agent, request_path, request_method, "
+                "status_code, access_time, ip_location "
+                "FROM access_logs WHERE user_id = ? ORDER BY access_time DESC LIMIT ?",
+                (user_id, limit)
+            )
+            results = []
+            for row in self.cursor.fetchall():
+                results.append({
+                    'id': row[0],
+                    'ip_address': row[1],
+                    'user_agent': row[2],
+                    'request_path': row[3],
+                    'request_method': row[4],
+                    'status_code': row[5],
+                    'access_time': row[6],
+                    'ip_location': row[7]
+                })
+            return results
+        except Exception as e:
+            logger.error(f"获取用户访问日志记录失败: {str(e)}")
             raise
     
     def close(self):

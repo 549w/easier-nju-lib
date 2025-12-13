@@ -2,6 +2,7 @@
 import React from 'react';
 import SearchBar from './components/SearchBar';
 import BookCard from './components/BookCard';
+import AdminDashboard from './components/AdminDashboard';
 function App() {
   // 将App组件导出到全局作用域
   window.App = App;
@@ -18,6 +19,8 @@ function App() {
   // 搜索历史
   const [searchHistory, setSearchHistory] = React.useState([]);
   const [showHistoryModal, setShowHistoryModal] = React.useState(false);
+  // 后台管理
+  const [showAdminDashboard, setShowAdminDashboard] = React.useState(false);
 
   // 初始化时获取用户信息和搜索历史
   React.useEffect(() => {
@@ -215,6 +218,7 @@ function App() {
     setToken(null);
     setUser(null);
     setSearchHistory([]);
+    setShowAdminDashboard(false);
   };
 
   // 设置校区
@@ -462,6 +466,11 @@ function App() {
         React.createElement('div', { className: 'header-user' },
           token && user ? React.createElement('div', { className: 'user-menu' },
             React.createElement('button', { className: 'btn-secondary', onClick: () => setShowHistoryModal(true) }, '搜索历史'),
+            // 管理员入口（仅当用户ID为1时显示）
+            React.createElement('button', {
+              className: 'btn-primary admin-btn',
+              onClick: () => setShowAdminDashboard(true)
+            }, '后台管理'),
             React.createElement('div', { className: 'user-info' },
               React.createElement('span', null, user.campus ? `校区: ${user.campus}` : '未设置校区'),
               React.createElement('button', { className: 'btn-logout', onClick: handleLogout }, '登出')
@@ -536,7 +545,10 @@ function App() {
     showAuthModal ? React.createElement(AuthModal) : null,
 
     // 搜索历史模态框
-    showHistoryModal ? React.createElement(HistoryModal) : null
+    showHistoryModal ? React.createElement(HistoryModal) : null,
+
+    // 后台管理面板
+    showAdminDashboard ? React.createElement(AdminDashboard) : null
   );
 }
 

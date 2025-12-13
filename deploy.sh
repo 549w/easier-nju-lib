@@ -2,10 +2,11 @@
 
 # 部署脚本 for easier-nju-lib 项目
 
-# 服务器信息
-SERVER_IP="[您的服务器公网IP地址]"
-SERVER_USER="[您的服务器用户名]"
-SERVER_PASSWORD="[您的服务器密码]"
+# 服务器信息（请在运行脚本前设置这些环境变量）
+# 例如：export SERVER_IP="您的服务器IP"
+export SERVER_IP=${SERVER_IP:-"[您的服务器公网IP地址]"}
+export SERVER_USER=${SERVER_USER:-"[您的服务器用户名]"}
+export SERVER_PASSWORD=${SERVER_PASSWORD:-"[您的服务器密码]"}
 
 # 项目信息
 PROJECT_NAME="easier-nju-lib"

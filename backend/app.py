@@ -62,6 +62,45 @@ jwt = JWTManager(app)
 # 导入数据库
 from database import db
 
+# 添加访问日志中间件
+@app.before_request
+def log_request():
+    try:
+        # 排除不需要记录的路径
+        if request.path.startswith('/static/') or request.path == '/favicon.ico':
+            return
+            
+        # 获取用户信息（如果已登录）
+        user_id = None
+        username = None
+        if request.headers.get('Authorization'):
+            try:
+                current_user = get_jwt_identity()
+                if current_user:
+                    user_id = int(current_user)
+                    user = db.get_user_by_id(user_id)
+                    if user:
+                        username = user[1]
+            except Exception as e:
+                logger.warning(f'获取用户身份失败: {str(e)}')
+        
+        # 获取IP地址
+        ip_address = request.headers.get('X-Forwarded-For', request.remote_addr)
+        if ',' in ip_address:
+            ip_address = ip_address.split(',')[0].strip()
+        
+        # 添加访问日志
+        db.add_access_log(
+            user_id=user_id,
+            username=username,
+            ip_address=ip_address,
+            user_agent=request.headers.get('User-Agent', ''),
+            request_path=request.path,
+            request_method=request.method
+        )
+    except Exception as e:
+        logger.error(f'记录访问日志失败: {str(e)}')
+
 # 添加异常处理（暂时注释掉，测试是否是异常处理导致问题）
 # @app.errorhandler(Exception)
 # def handle_exception(e):
@@ -364,6 +403,81 @@ def test_api():
 @app.route('/test', methods=['GET'])
 def test():
     return jsonify({'message': '测试路由成功', 'status': 'ok'})
+
+# 后台管理API - 需要管理员权限
+# 简单的管理员验证（实际生产环境应使用更安全的方式）
+def is_admin():
+    current_user = get_jwt_identity()
+    if not current_user:
+        return False
+    # 假设用户ID为1的是管理员
+    return int(current_user) == 1
+
+@app.route('/api/admin/statistics', methods=['GET'])
+@jwt_required()
+def get_statistics():
+    try:
+        if not is_admin():
+            return jsonify({'error': '无管理员权限'}), 403
+            
+        # 获取统计信息
+        statistics = db.get_statistics()
+        
+        return jsonify({'statistics': statistics})
+    except Exception as e:
+        logger.error(f"获取统计信息失败: {str(e)}")
+        return jsonify({'error': str(e)}), 400
+
+@app.route('/api/admin/users', methods=['GET'])
+@jwt_required()
+def get_all_users():
+    try:
+        if not is_admin():
+            return jsonify({'error': '无管理员权限'}), 403
+            
+        # 获取所有用户信息
+        users = db.get_all_users()
+        
+        return jsonify({'users': users})
+    except Exception as e:
+        logger.error(f"获取所有用户信息失败: {str(e)}")
+        return jsonify({'error': str(e)}), 400
+
+@app.route('/api/admin/access-logs', methods=['GET'])
+@jwt_required()
+def get_all_access_logs():
+    try:
+        if not is_admin():
+            return jsonify({'error': '无管理员权限'}), 403
+            
+        # 获取查询参数
+        limit = request.args.get('limit', 1000, type=int)
+        
+        # 获取所有访问日志
+        logs = db.get_all_access_logs(limit)
+        
+        return jsonify({'logs': logs})
+    except Exception as e:
+        logger.error(f"获取所有访问日志失败: {str(e)}")
+        return jsonify({'error': str(e)}), 400
+
+@app.route('/api/admin/users/<int:user_id>/access-logs', methods=['GET'])
+@jwt_required()
+def get_user_access_logs(user_id):
+    try:
+        if not is_admin():
+            return jsonify({'error': '无管理员权限'}), 403
+            
+        # 获取查询参数
+        limit = request.args.get('limit', 100, type=int)
+        
+        # 获取指定用户的访问日志
+        logs = db.get_user_access_logs(user_id, limit)
+        
+        return jsonify({'logs': logs})
+    except Exception as e:
+        logger.error(f"获取用户访问日志失败: {str(e)}")
+        return jsonify({'error': str(e)}), 400
 
 if __name__ == '__main__':
     # 开启debug模式以获取详细错误信息

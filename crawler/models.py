@@ -18,7 +18,7 @@ class Record:
         if location[5:7] in NAMES_TO_CAMPUSES.keys():
             self.campus = NAMES_TO_CAMPUSES[location[5:7]]
     def sort_copies(self):
-        self.copies.sort(key=lambda x: (x.code_num, x.call_num, x.edition))
+        self.copies.sort(key=lambda x: (x.edition, x.code_num, x.call_num))
     def add_copy(self, borrow_status: str, book_status: str, call_num: str, code_num: str, edition: str):
         new_copy: Copy = Copy(borrow_status, book_status, call_num, code_num, edition)
         self.copies.append(new_copy)
@@ -81,6 +81,12 @@ class BookList():
     def sort_by_press(self, press: str):
         for book in self.list[::-1]:
             if press in book.publication_info:
+                self.list.remove(book)
+                self.list.insert(0, book)
+        return self
+    def sort_by_author(self, author: str):
+        for book in self.list[::-1]:
+            if author in book.author:
                 self.list.remove(book)
                 self.list.insert(0, book)
         return self

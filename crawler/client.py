@@ -15,7 +15,7 @@ class NJULibClient:
         }
         response = requests.get(BASE_URL + SEARCH_API, params)
         if response.status_code != 200:
-            raise NetworkError(f'NetworkError: {response.status_code}')
+            raise NetworkError(f'HTTP {response.status_code}')
         response.encoding = 'utf-8'
         return response.text
     def fetch_book_detail(self, detail_url: str) -> str:

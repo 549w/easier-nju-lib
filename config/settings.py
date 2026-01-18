@@ -1,3 +1,7 @@
+"""
+本项目中会使用到的各种有意义的基础信息。
+"""
+
 BASE_URL = 'http://weixin.libstar.cn'
 
 SEARCH_API = '/weixin/unify/search'

@@ -1,3 +1,7 @@
+"""
+本项目中用到的所有自定义异常。
+"""
+
 class EasierNJULibError(Exception):
     """自定义异常基类"""
     pass

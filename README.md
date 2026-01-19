@@ -6,7 +6,13 @@
 
  **Easier NJU Lib** 是一个基于 Python 的南京大学图书馆检索优化工具，
  为用户提供 **更易用的搜索方式、更清晰的搜索结果** 。
- 
+
+## 快速体验
+
+https://easiernjulib.streamlit.app
+
+ **注：** 在线运行时搜索可能略慢于本地运行。
+
 ## 安装
 
 ### 1. Python 环境要求

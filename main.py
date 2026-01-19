@@ -10,11 +10,12 @@ Easier NJU Lib 项目的 Streamlit Web 应用主入口。
 - 清晰展示搜索结果。
 """
 import streamlit as st
-from config.settings import NAMES_TO_CAMPUSES, STATUS_DISPLAY
+from config.settings import INSTRUCTION, NAMES_TO_CAMPUSES, STATUS_DISPLAY
 from crawler.service import NJULibService
 st.header('Easier NJU Lib')
-st.subheader('更好用的NJU图书馆检索方式')
-
+st.subheader('更好用的 NJU 图书馆检索方式')
+with st.expander(':material/help: 这是什么'):
+    st.write(INSTRUCTION)
 campuses: list = NAMES_TO_CAMPUSES.keys()
 name_selected = st.segmented_control(
     ":material/apartment: 校区", campuses, selection_mode="single"
@@ -25,12 +26,12 @@ else:
     campus_selected = None
 max_num_of_results = st.slider(":material/vertical_align_top: 最大源数据条数", 10, 50, 15)
 if max_num_of_results > 30:
-    st.warning('条数过大可能导致搜索较慢。')
+    st.warning(':material/more_time: 条数过大可能导致搜索较慢。')
 col1, col2, col3 = st.columns(3)
 keyword = col1.text_input(':material/book_3: 书名').strip()
 author = col2.text_input(':material/person: 作者（可选）').strip()
 press = col3.text_input(':material/house: 出版社（可选）').strip()
-if st.button("搜索"):
+if st.button(":material/search: 搜索"):
     #st.write(f'{campus_selected} hello, {keyword}')
     if keyword:
         with st.spinner('正在搜索……', show_time = True):
@@ -44,12 +45,12 @@ if st.button("搜索"):
             if press:
                 books.sort_by_press(press)
         if len(books.list) == 0:
-            st.warning('未搜索到任何结果。')
+            st.warning(':material/close: 未搜索到任何结果。')
         elif campus_selected and not books.in_campus(campus_selected):
-            st.warning('在所选校区未搜索到相关书目。请参考其他校区的结果或尝试增加 **最大源数据条数** 。')
+            st.warning(':material/sentiment_dissatisfied: 在所选校区未搜索到相关书目。请参考其他校区的结果或尝试增加 **最大源数据条数** 。')
             st.snow()
         else:
-            st.success('搜索完成！')
+            st.success(':material/done_all: 搜索完成！')
             st.balloons()
         for book in books.list:
             with st.container(border=True):
@@ -71,7 +72,7 @@ if st.button("搜索"):
                 brief_message += f':grey-badge[:material/barcode: {book.isbn}]'
                 st.markdown(brief_message)
                 if len(book.collection.list) == 0:
-                    st.warning('这本书没有馆藏信息。')
+                    st.warning(':material/indeterminate_question_box: 这本书没有馆藏信息。')
                 for record in book.collection.list:
                     record.sort_copies()
                     with st.container(border=True, gap = None):
@@ -104,4 +105,6 @@ if st.button("搜索"):
 
                             st.markdown(message)
     else:
-        st.warning('请输入书名。')
+        st.warning(':material/keyboard_alt: 请输入书名。')
+st.divider()
+st.write(' `Made by JHY · NJU` ')

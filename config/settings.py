@@ -22,3 +22,7 @@ STATUS_DISPLAY = {
     '装订中': ':blue-badge[:material/attach_file: 装订中]',
     '交接': ':blue-badge[:material/transform: 交接]'
 }
+
+INSTRUCTION = ("这是一个小应用，希望帮你更方便地查找NJU图书馆的藏书。  "
+               "除了书名之外，你还可以指定 **校区、作者和出版社** ，  "
+               "符合你需要的信息将被 **优先** 并 :violet-badge[突出] 展示。")

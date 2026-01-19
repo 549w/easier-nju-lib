@@ -67,6 +67,8 @@ if st.button("搜索"):
                     brief_message += f':violet-badge[:material/house: {book.publication_info}]'
                 else:
                     brief_message += f':grey-badge[:material/house: {book.publication_info}]'
+
+                brief_message += f':grey-badge[:material/barcode: {book.isbn}]'
                 st.markdown(brief_message)
                 if len(book.collection.list) == 0:
                     st.warning('这本书没有馆藏信息。')

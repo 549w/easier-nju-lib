@@ -118,7 +118,7 @@ class Collection:
         return None
 
 
-class Book():
+class Book:
     """
     表示一种书。
     包含书名、作者、ISBN、出版信息、馆藏信息（Collection）和图书详情页的 url 。
@@ -138,7 +138,15 @@ class Book():
         """
         self.title = title
         self.author = author
-        self.isbn = isbn
+        formatted_isbn = isbn.strip().replace('-', '')
+        if len(formatted_isbn) == 13:
+            self.isbn = formatted_isbn
+        elif '-' not in isbn:
+            self.isbn = isbn
+        elif len(formatted_isbn) == 10:
+            self.isbn = '978' + formatted_isbn
+        else:
+            self.isbn = isbn
         self.publication_info = publication_info
         self.collection = Collection()
         self.detail_url = detail_url

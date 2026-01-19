@@ -46,7 +46,7 @@ class NJULibParser:
                 raise ParseError('desc node is not complete')
             title = title_node.text.strip()
             author = desc_node[0].text.strip()[4:]
-            isbn = desc_node[1].text.strip()
+            isbn = desc_node[1].text.strip()[5:]
             publication_info = desc_node[2].text.strip()[5:]
             book = Book(title, author, isbn, publication_info, detail_url)
             book_list.add_book(book, merge = False)

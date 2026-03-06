@@ -20,7 +20,8 @@ STATUS_DISPLAY = {
     '签收': ':green-badge[:material/inventory: 签收]',
     '下架': ':red-badge[:material/do_not_disturb_on: 下架]',
     '装订中': ':blue-badge[:material/attach_file: 装订中]',
-    '交接': ':blue-badge[:material/transform: 交接]'
+    '交接': ':blue-badge[:material/transform: 交接]',
+    '物流中': ':orange-badge[:material/local_shipping: 物流中]'
 }
 
 INSTRUCTION = ("这是一个小应用，希望帮你更方便地查找NJU图书馆的藏书。  "

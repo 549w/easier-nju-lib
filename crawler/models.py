@@ -107,7 +107,7 @@ class Collection:
         若新增的馆藏记录与已有的馆藏记录位置（location）相同，
         则将新增的馆藏记录的所有实体书记录（copy）合并到已有的馆藏记录中；
         否则直接添加。
-        :param new_record:
+        :param new_record: 待添加的馆藏记录（Record）
         :return: 直接在自身属性上添加，无返回值
         """
         for record in self.list:
@@ -129,12 +129,12 @@ class Book:
     def __init__(self, title: str, author: str, isbn: str, publication_info: str, detail_url: str):
         """
         初始化 Book 对象。
+        初始化时，属性 collection 为空，后续操作时维护。
         :param title: 书名
         :param author: 作者
         :param isbn: 书号
         :param publication_info: 出版信息，一般为 “<出版社> <出版年份>”
         :param detail_url: 图书详情页 url
-        初始化时，属性 collection 为空，后续操作时维护。
         """
         self.title = title
         self.author = author

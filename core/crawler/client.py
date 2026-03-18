@@ -5,9 +5,9 @@ crawler.client
 """
 
 import requests
-from config.settings import BASE_URL, SEARCH_API
-from config.magic_params import MAGIC_PARAMS
-from exceptions import NetworkError
+from core.config.settings import BASE_URL, SEARCH_API
+from core.config.magic_params import MAGIC_PARAMS
+from core.exceptions import NetworkError
 class NJULibClient:
     """
     表示抽象的抓取网页原始数据的概念。

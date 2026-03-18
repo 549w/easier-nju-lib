@@ -10,8 +10,8 @@ Easier NJU Lib 项目的 Streamlit Web 应用主入口。
 - 清晰展示搜索结果。
 """
 import streamlit as st
-from config.settings import INSTRUCTION, NAMES_TO_CAMPUSES, STATUS_DISPLAY
-from crawler.service import NJULibService
+from core.config.settings import INSTRUCTION, NAMES_TO_CAMPUSES, STATUS_DISPLAY
+from core.crawler.service import NJULibService
 st.header('Easier NJU Lib')
 st.subheader('更好用的 NJU 图书馆检索方式')
 with st.expander(':material/help: 这是什么'):

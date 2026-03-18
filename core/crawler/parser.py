@@ -5,8 +5,8 @@ crawler.parser
 """
 
 from bs4 import BeautifulSoup
-from crawler.models import Collection, Book, BookList, Record
-from exceptions import ParseError
+from core.crawler.models import Collection, Book, BookList, Record
+from core.exceptions import ParseError
 class NJULibParser:
     """
     表示抽象的解析概念。

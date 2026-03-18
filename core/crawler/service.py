@@ -4,9 +4,9 @@ crawler.service
 封装上层代码直接使用的功能。
 """
 
-from crawler.models import Collection, Book, BookList, Record
-from crawler.parser import NJULibParser
-from crawler.client import NJULibClient
+from core.crawler.models import BookList
+from core.crawler.parser import NJULibParser
+from core.crawler.client import NJULibClient
 class NJULibService:
     """
     表示抽象的图书馆服务概念。

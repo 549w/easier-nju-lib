@@ -3,8 +3,9 @@ crawler.models
 
 项目中涉及的各种 类。
 """
-from config.settings import NAMES_TO_CAMPUSES
-from typing import List, Dict
+from core.config.settings import NAMES_TO_CAMPUSES
+from typing import List
+
 
 class Copy:
     """

@@ -1,17 +1,10 @@
 """
-Easier NJU Lib 项目的 Streamlit Web 应用主入口。
-
-在项目目录下执行指令 streamlit run main.py 即可运行。
-
-本入口负责：
-- 渲染前端 UI；
-- 读取用户输入；
-- 调用 crawler.service 中的服务完成搜索、排序；
-- 清晰展示搜索结果。
+Flask 版本中已弃用，仅作为重构参考。
+Easier NJU Lib 项目的 原 Streamlit Web 应用主入口。
 """
 import streamlit as st
-from core.config.settings import INSTRUCTION, NAMES_TO_CAMPUSES, STATUS_DISPLAY
-from core.crawler.service import NJULibService
+from config.settings import INSTRUCTION, NAMES_TO_CAMPUSES, STATUS_DISPLAY
+from crawler.service import NJULibService
 st.header('Easier NJU Lib')
 st.subheader('更好用的 NJU 图书馆检索方式')
 with st.expander(':material/help: 这是什么'):

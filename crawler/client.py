@@ -5,14 +5,15 @@ crawler.client
 """
 
 import requests
-from core.config.settings import BASE_URL, SEARCH_API
-from core.config.magic_params import MAGIC_PARAMS
-from core.exceptions import NetworkError
+from config.settings import BASE_URL, SEARCH_API
+from config.magic_params import MAGIC_PARAMS
+from exceptions import NetworkError
 class NJULibClient:
     """
-    表示抽象的抓取网页原始数据的概念。
+    表示抽象的 抓取网页原始数据 的概念。
     """
-    def search(self, keyword: str, page: int = 1, rows: int = 15) -> str:
+    @staticmethod
+    def search(keyword: str, page: int = 1, rows: int = 15) -> str:
         """
         在原网页上搜索关键词，
         限制页数和图书条数，
@@ -40,7 +41,8 @@ class NJULibClient:
         response.encoding = 'utf-8'
         return response.text
 
-    def fetch_book_detail(self, detail_url: str) -> str:
+    @staticmethod
+    def fetch_book_detail(detail_url: str) -> str:
         """
         抓取图书详情页的整个网页备用。
 

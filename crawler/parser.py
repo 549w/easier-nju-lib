@@ -5,15 +5,16 @@ crawler.parser
 """
 
 from bs4 import BeautifulSoup
-from core.crawler.models import Collection, Book, BookList, Record
-from core.exceptions import ParseError
+from crawler.models import Collection, Book, BookList, Record
+from exceptions import ParseError
 class NJULibParser:
     """
-    表示抽象的解析概念。
+    表示抽象的 解析 概念。
     注：以下解析函数均基于当前原网页结构，
     若原网页更新，需要相应调整解析规则。
     """
-    def brief_parser(self, html: str) -> BookList:
+    @staticmethod
+    def brief_parser(html: str) -> BookList:
         """
         解析搜索结果页 html 。
 
@@ -52,7 +53,8 @@ class NJULibParser:
             book_list.add_book(book, merge = False)
         return book_list
 
-    def detail_parser(self, html: str) -> Collection:
+    @staticmethod
+    def detail_parser(html: str) -> Collection:
 
         """
         解析图书详情页 html 。

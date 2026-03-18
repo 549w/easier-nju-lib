@@ -3,7 +3,7 @@ crawler.models
 
 项目中涉及的各种 类。
 """
-from core.config.settings import NAMES_TO_CAMPUSES
+from config.settings import NAMES_TO_CAMPUSES
 from typing import List
 
 
@@ -40,12 +40,11 @@ class Record:
         :param location: 馆藏位置
         注：当一个 Record 被初始化时， campus 根据馆藏位置的第 5 ~ 6 个字符自动补充（如 “南京大学-鼓楼综合借阅室” -> ‘鼓楼’ -> ‘gulou’），
         若无法对应则置为 None 。
-        copies 和 copy_num 在初始化阶段为空，后续添加和合并时维护。
+        copies 在初始化阶段为空，后续添加和合并时维护。
         """
         self.location: str = location
         self.campus: str | None = None
         self.copies: List[Copy] = []
-        self.copy_num: int = 0
         if location[5:7] in NAMES_TO_CAMPUSES.keys():
             self.campus = NAMES_TO_CAMPUSES[location[5:7]]
 
@@ -69,7 +68,6 @@ class Record:
         """
         new_copy: Copy = Copy(borrow_status, book_status, call_num, code_num, edition)
         self.copies.append(new_copy)
-        self.copy_num += 1
 
     def merge_copies(self, new_copies: List[Copy]):
         """
@@ -79,7 +77,7 @@ class Record:
         :return: 直接在自身属性上添加，无返回值
         """
         self.copies += new_copies
-        self.copy_num += len(new_copies)
+
     def in_campus(self, campus: str) -> bool:
         """
         检测该馆藏记录是否在指定校区。
@@ -102,6 +100,7 @@ class Collection:
         list 在初始化阶段为空，后续添加时维护。
         """
         self.list: List[Record] = []
+
     def add_record(self, new_record: Record) -> None:
         """
         添加一条馆藏记录（Record）。
@@ -159,6 +158,7 @@ class Book:
         :return: 直接在自身属性上添加，无返回值
         """
         self.collection.list += new_collection.list
+
     def in_campus(self, campus: str) -> bool:
         """
         检测该书是否在指定校区有馆藏。
@@ -179,6 +179,7 @@ class BookList:
         初始化 BookList 对象。
         """
         self.list: List[Book] = []
+
     def add_book(self, new_book: Book, merge: bool) -> None:
         """
         添加一种书（Book）。
@@ -249,3 +250,37 @@ class BookList:
                 self.list.remove(book)
                 self.list.insert(0, book)
         return self
+
+    def to_dict(self) -> dict:
+        booklist_dict: dict = {
+            'booklist': []
+        }
+
+        for book in self.list:
+            book_dict = {
+                'title': book.title,
+                'author': book.author,
+                'isbn': book.isbn,
+                'publication_info': book.publication_info,
+                'detail_url': book.detail_url,
+                'collection': []
+            }
+            for record in book.collection.list:
+                record_dict = {
+                    'location': record.location,
+                    'campus': record.campus,
+                    'copies': []
+                }
+                for copy in record.copies:
+                    copy_dict = {
+                        'borrow_status': copy.borrow_status,
+                        'book_status': copy.book_status,
+                        'call_num': copy.call_num,
+                        'code_num': copy.code_num,
+                        'edition': copy.edition
+                    }
+                    record_dict['copies'].append(copy_dict)
+                book_dict['collection'].append(record_dict)
+            booklist_dict['booklist'].append(book_dict)
+
+        return booklist_dict

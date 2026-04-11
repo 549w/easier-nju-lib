@@ -15,12 +15,14 @@ class Copy:
         """
         初始化 Copy 对象。
 
+        #:param book_id: 图书在官方系统中的唯一编号。
         :param borrow_status: 借阅状态。例如 “可借”
         :param book_status: 图书状态。例如 “在架”
         :param call_num: 索书号
         :param code_num: 编号
         :param edition: 版本/分册/分期等
         """
+        #self.book_id: str = book_id
         self.borrow_status: str = borrow_status
         self.book_status: str = book_status
         self.call_num: str = call_num
@@ -45,8 +47,9 @@ class Record:
         self.campus: str | None = None
         self.copies: List[Copy] = []
         self.copy_num: int = 0
-        if location[5:7] in NAMES_TO_CAMPUSES.keys():
-            self.campus = NAMES_TO_CAMPUSES[location[5:7]]
+        for name in NAMES_TO_CAMPUSES.keys():
+            if name in location:
+                self.campus = NAMES_TO_CAMPUSES[name]
 
     def sort_copies(self) -> None:
         """
@@ -168,6 +171,29 @@ class Book:
             if record.in_campus(campus):
                 return True
         return False
+
+
+class Work:
+    """
+    表示一种著作，包含若干种版本的书。
+    这个主要是应对OPAC网站的情况，因为OPAC网站会把同一本书的不同版本放在一起。
+    """
+    def __init__(self, name: str, author: str):
+        """
+        :param title: 书名
+        :param author: 作者
+        :param isbn: 书号
+        """
+        self.name = name
+        self.author = author
+        self.editions: List[Book] = []
+
+    def add_edition(self, edition: Book):
+        """
+        添加一本版本。
+        :param edition: 一本版本
+        """
+        self.editions.append(edition)
 
 class BookList:
     """

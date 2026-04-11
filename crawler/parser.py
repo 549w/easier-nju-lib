@@ -1,13 +1,14 @@
 """
 crawler.parser
 
-封装解析 html 功能。
+封装解析 html 和 json 的功能。
 """
 
 from bs4 import BeautifulSoup
 from crawler.models import Collection, Book, BookList, Record
 from exceptions import ParseError
-class NJULibParser:
+
+class WeixinParser:
     """
     表示抽象的解析概念。
     注：以下解析函数均基于当前原网页结构，
@@ -35,7 +36,7 @@ class NJULibParser:
         book_list: BookList = BookList()
         for result in results:
 
-            detail_url = result['href']
+            detail_url = str(result['href'])
             if detail_url is None:
                 raise ParseError('detail url is not found')
             title_node = result.find('h4', class_='weui-media-box__title')
@@ -104,3 +105,19 @@ class NJULibParser:
             new_record.add_copy(borrow_status, book_status, call_num, code_num, edition)
             collection.add_record(new_record)
         return collection
+    
+class OpacParser:
+
+    def brief_parser(self, json: dict) -> BookList:
+        book_list: BookList = BookList()
+        for result in json["data"]["searchResult"]:
+            new_book = Book(result["title"],
+                            result["author"],
+                            result["isbn"] if result["isbn"] else "0",
+                            result["publisher"] + ""
+                            + result["publishYear"],
+                            "(TEST)replaced by record_id: "
+                            + str(result["recordId"]))
+            book_list.add_book(new_book, merge=False)
+
+        return book_list

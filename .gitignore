@@ -70,3 +70,5 @@ instance/
 .coverage
 htmlcov/
 private/
+
+test_*.py

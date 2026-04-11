@@ -1,18 +1,24 @@
 """
 crawler.client
 
-封装获取 html 功能。
+封装获取源数据功能，包括 html 和 json 。
 """
 
+from typing import Dict
 import requests
-from config.settings import BASE_URL, SEARCH_API
-from config.magic_params import MAGIC_PARAMS
+import json
+import urllib3
+from config.endpoints import WEIXIN_BASE_URL, WEIXIN_SEARCH_API, OPAC_BASE_URL, OPAC_SEARCH_API
+from config.magic_params import MAGIC_PARAMS, OPAC_HEADERS
 from exceptions import NetworkError
-class NJULibClient:
+from crawler.payloads import opac_search
+from crawler.payloads import weixin_search
+
+class WeixinClient:
     """
-    表示抽象的抓取网页原始数据的概念。
+    表示抽象的从微信公众号服务中抓取网页原始数据的概念。
     """
-    def search(self, keyword: str, page: int = 1, rows: int = 15) -> str:
+    def brief_search(self, keyword: str, rows: int = 15) -> str:
         """
         在原网页上搜索关键词，
         限制页数和图书条数，
@@ -25,30 +31,38 @@ class NJULibClient:
         """
 
         # 按照原网页的 url 组织参数
-        params = {
-            'mappingPath': MAGIC_PARAMS['mappingPath'],
-            'groupCode': MAGIC_PARAMS['groupCode'],
-            'pubId': MAGIC_PARAMS['pubId'],
-            'searchFieldContent': keyword,
-            'searchField': MAGIC_PARAMS['searchField'],
-            'page': page,
-            'rows': rows
-        }
-        response = requests.get(BASE_URL + SEARCH_API, params)
+        params = weixin_search(keyword, rows)
+        response = requests.get(WEIXIN_BASE_URL + WEIXIN_SEARCH_API, params)
         if response.status_code != 200:
             raise NetworkError(f'HTTP {response.status_code}')
         response.encoding = 'utf-8'
         return response.text
 
-    def fetch_book_detail(self, detail_url: str) -> str:
+    def detail_search(self, detail_url: str) -> str:
         """
         抓取图书详情页的整个网页备用。
 
         :param detail_url: 图书详情页地址
         :return: 图书详情页的整个网页 html
         """
-        response = requests.get(BASE_URL + detail_url)
+        response = requests.get(WEIXIN_BASE_URL + detail_url)
         if response.status_code != 200:
             raise NetworkError(f'HTTP {response.status_code}')
         response.encoding = 'utf-8'
         return response.text
+    
+class OpacClient:
+    """
+    OpacClient 类用于抓取和操作 OPAC 网站。
+    """
+    def brief_search(self, keyword: str, num: int = 15) -> Dict:
+        urllib3.disable_warnings()
+        response = requests.post(OPAC_BASE_URL + OPAC_SEARCH_API,
+                  json = opac_search(keyword, num),
+                  headers = OPAC_HEADERS,
+                  verify = False)
+        response_dict = response.json()
+
+        if not response_dict['success']:
+            raise NetworkError(f'OPAC brief search failed.')
+        return response.json()

@@ -9,3 +9,13 @@ MAGIC_PARAMS = {
     'pubId': 1,
     'searchField': 'keyWord'
 }
+
+OPAC_HEADERS = {
+    "Content-Type": "application/json;charset=utf-8",
+    #"Accept": "application/json, text/plain, */*",
+    #"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15",
+    #"Referer": "https://opac.nju.edu.cn/",
+    #"Cookie": "SameSite=None; _ga_VJQNNH3B5M=...; _ga=...",
+    "groupCode": "200027",
+    #"x-lang": "CHI",
+}

@@ -18,7 +18,7 @@ st.header('Easier NJU Lib')
 st.subheader('更好用的 NJU 图书馆检索方式')
 with st.expander(':material/help: 这是什么'):
     st.write(INSTRUCTION)
-campuses: list = NAMES_TO_CAMPUSES.keys()
+campuses: list[str] = list(NAMES_TO_CAMPUSES.keys())
 name_selected = st.segmented_control(
     ":material/apartment: 校区", campuses, selection_mode="single"
 )
@@ -34,14 +34,14 @@ keyword = col1.text_input(':material/book_3: 书名').strip()
 author = col2.text_input(':material/person: 作者（可选）').strip()
 press = col3.text_input(':material/house: 出版社（可选）').strip()
 if st.button(":material/search: 搜索"):
-    #st.write(f'{campus_selected} hello, {keyword}')
     if keyword:
         with st.spinner('正在搜索……', show_time = True):
-            books = NJULibService().search(keyword, max_num_of_results)
+            if campus_selected:
+                books = NJULibService().weixin_search(keyword, max_num_of_results, True, campus_selected)
+            else:
+                books = NJULibService().weixin_search(keyword, max_num_of_results)
 
             # 若用户选择/输入了校区/作者/出版社，则优先显示更符合要求的结果。
-            if name_selected:
-                books = NJULibService().sort_by_campus(books, campus_selected)
             if author:
                 books.sort_by_author(author)
             if press:

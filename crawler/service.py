@@ -4,7 +4,12 @@ crawler.service
 封装上层代码直接使用的功能。
 """
 
-from crawler.models import Collection, Book, BookList, Record
+from crawler.models import (
+    Record,
+    Collection,
+    Book,
+    BookList
+    )
 from crawler.parser import WeixinParser
 from crawler.client import WeixinClient
 class NJULibService:

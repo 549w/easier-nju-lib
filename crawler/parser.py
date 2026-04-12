@@ -5,7 +5,12 @@ crawler.parser
 """
 
 from bs4 import BeautifulSoup
-from crawler.models import Collection, Book, BookList, Record
+from crawler.models import (
+    Record,
+    Collection,
+    Book,
+    BookList
+    )
 from exceptions import ParseError
 
 class WeixinParser:

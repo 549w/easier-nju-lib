@@ -52,6 +52,7 @@ Thumbs.db
 nosetests.xml
 test-results/
 *.tox/
+tests/
 
 # Flask 相关
 instance/
@@ -72,3 +73,5 @@ htmlcov/
 private/
 
 test_*.py
+
+crawler/examples/

@@ -2,16 +2,15 @@ from config.magic_params import MAGIC_PARAMS
 
 def weixin_search(keyword: str, num: int = 15):
     return {
-            'mappingPath': MAGIC_PARAMS['mappingPath'],
-            'groupCode': MAGIC_PARAMS['groupCode'],
-            'pubId': MAGIC_PARAMS['pubId'],
-            'searchFieldContent': keyword,
-            'searchField': MAGIC_PARAMS['searchField'],
-            'page': 1,
-            'rows': num
-        }
-
-def opac_search(keyword: str, rows: int = 15):
+        'mappingPath': MAGIC_PARAMS['mappingPath'],
+        'groupCode': MAGIC_PARAMS['groupCode'],
+        'pubId': MAGIC_PARAMS['pubId'],
+        'searchFieldContent': keyword,
+        'searchField': MAGIC_PARAMS['searchField'],
+        'page': 1,
+        'rows': num
+    }
+def opac_search(keyword: str, num: int = 15):
     return {
         "docCode": [
             None
@@ -44,7 +43,7 @@ def opac_search(keyword: str, rows: int = 15):
         "sortField": "relevance",
         "sortClause": "asc",
         "page": 1,
-        "rows": rows,
+        "rows": num,
         "onlyOnShelf": None,
         "searchItems": None,
         "newCoreInclude": [],
@@ -53,8 +52,10 @@ def opac_search(keyword: str, rows: int = 15):
         "indexSearch": 1
     }
 
-def opac_advanced_search(keyword, author):
-    return {"docCode":["1","2"],
+def opac_advanced_search(keyword: str, author: str):
+
+    return {
+        "docCode":["1","2"],
             "litCode":[],
             "matchMode":"2",
             "resourceType":["1","2"],
@@ -99,4 +100,25 @@ def opac_advanced_search(keyword, author):
             "searchFieldContent":"",
             "searchField":"keyWord",
             "searchFieldList":None,
-            "isOpen":False}
+            "isOpen":False
+    }
+
+def opac_cover(isbn: str, title: str, book_id: str):
+
+    return {
+        "isbn": isbn,
+        "title": title,
+        "recordId": book_id
+    }
+
+def opac_collection(book_id: str, num: int):
+    
+    return {
+        "page": 1,
+        "rows": num, # 这玩意应该从响应体的 totalCount 中获取
+        "entrance": None,
+        "recordId": book_id,
+        "isUnify": True,
+        "sortType": 0,
+        "callNo": ""
+    }

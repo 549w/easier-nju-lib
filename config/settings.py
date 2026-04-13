@@ -66,3 +66,7 @@ searchItems[0].oper = null
 }
 '''
 )
+
+MODEL_NAME = "qwen-plus"
+
+MODEL_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"

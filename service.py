@@ -1,5 +1,10 @@
 # 啦啦啦，advanced search不用unfold!
-from config.settings import DASHSCOPE_API_KEY, SYSTEM_PROMPT
+from config.settings import (
+    DASHSCOPE_API_KEY, 
+    SYSTEM_PROMPT,
+    MODEL_BASE_URL,
+    MODEL_NAME
+    )
 from crawler.models import Book, Item
 from crawler.parser import OpacParser
 from crawler.payloads import (
@@ -27,11 +32,11 @@ def intent_phrase_to_semantic_frame(
 ) :
     client = OpenAI(
         api_key=DASHSCOPE_API_KEY,
-        base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+        base_url=MODEL_BASE_URL,
         )
     
     completion = client.chat.completions.create(
-        model="qwen-plus",
+        model=MODEL_NAME,
         messages=[
             {'role': 'system', 'content': SYSTEM_PROMPT},
             {'role': 'user', 'content': intent_phrase}

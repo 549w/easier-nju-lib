@@ -41,5 +41,3 @@ class Book:
         self.items: List[Item] = []
         self.abstract: str|None = None
         self.language_code: str|None = None
-
-class

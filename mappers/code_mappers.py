@@ -57,5 +57,3 @@ CODE_TO_SEARCH_FIELD = {}
 for _l in _para_list_data["data"]:
     SEARCH_FIELD_TO_CODE[_l["searchField"]] = _l["id"]
     CODE_TO_SEARCH_FIELD[_l["id"]] = _l["searchField"]
-
-pprint(SEARCH_FIELD_TO_CODE)

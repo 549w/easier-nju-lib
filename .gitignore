@@ -75,3 +75,5 @@ private/
 test_*.py
 
 crawler/examples/
+
+!code_dict.json

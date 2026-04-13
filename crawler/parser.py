@@ -126,3 +126,8 @@ class OpacParser:
             book_list.add_book(new_book, merge=False)
 
         return book_list
+    
+    def collection_parser(self, json: Dict) -> Collection:
+        collection = Collection()
+        for result in json["data"]["list"]:
+            

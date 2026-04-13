@@ -1,9 +1,5 @@
 # GET
 
-WEIXIN_BASE_URL = 'http://weixin.libstar.cn'
-
-WEIXIN_SEARCH_API = '/weixin/unify/search'
-
 OPAC_COVER_API = '/find/book/getDuxiuImageUrl'
 
 # POST

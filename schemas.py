@@ -37,9 +37,9 @@ class ItemResponse(BaseModel):
     """
     条目返回类
     """
-    item_id: str
-    call_no: str
-    barcode: str
+    item_id: int|None
+    call_no: str|None
+    barcode: str|None
     current_location_code: Optional[int]
     process_type_code: Optional[int]
     circulation_attribute_code: Optional[str]

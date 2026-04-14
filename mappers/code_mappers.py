@@ -57,3 +57,14 @@ CODE_TO_SEARCH_FIELD = {}
 for _l in _para_list_data["data"]:
     SEARCH_FIELD_TO_CODE[_l["searchField"]] = _l["id"]
     CODE_TO_SEARCH_FIELD[_l["id"]] = _l["searchField"]
+
+SORT_TYPE_TO_CODE = {
+    "按索书号升序": "1",
+    "按索书号降序": "2",
+    "按馆藏地升序": "3",
+    "按馆藏地降序": "4",
+    "按馆藏地升序": "5",
+    "按馆藏地降序": "6",
+    "按馆藏地升序": "7",
+    "按馆藏地降序": "8",
+}

@@ -77,3 +77,11 @@ test_*.py
 crawler/examples/
 
 !code_dict.json
+
+# SQLite database
+*.db
+*.sqlite
+*.sqlite3
+
+# runtime data
+data/

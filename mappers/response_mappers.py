@@ -2,7 +2,8 @@ from crawler.models import Item, Book
 from schemas import (
     ItemResponse,
     BookResponse,
-    SearchResponse
+    BookSearchResponse,
+    ItemSearchResponse
     )
 from typing import List
 
@@ -43,15 +44,28 @@ def book_response_mapper(
         language_code=book.language_code
     )
 
-def search_response_mapper(
+def book_search_response_mapper(
         total: int,
         books: List[Book]
-        ) -> SearchResponse:
+        ) -> BookSearchResponse:
     
-    return SearchResponse(
+    return BookSearchResponse(
         total=total,
         books=[
             book_response_mapper(book)
             for book in books
+            ]
+    )
+
+def item_search_response_mapper(
+        total: int,
+        items: List[Item]
+        ) -> ItemSearchResponse:
+    
+    return ItemSearchResponse(
+        total=total,
+        items=[
+            item_response_mapper(item)
+            for item in items
             ]
     )

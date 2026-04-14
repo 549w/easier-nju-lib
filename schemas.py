@@ -59,9 +59,16 @@ class BookResponse(BaseModel):
     abstract: Optional[str]
     language_code: Optional[str]
 
-class SearchResponse(BaseModel):
+class BookSearchResponse(BaseModel):
     """
     搜索返回类
     """
     total: int
     books: List[BookResponse]
+
+class ItemSearchResponse(BaseModel):
+    """
+    条目搜索返回类
+    """
+    total: int
+    items: List[ItemResponse]

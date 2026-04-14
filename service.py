@@ -110,9 +110,9 @@ def book_search(
             )
         #print("开始抓取封面")
         new_book.cover = OpacClient().get_cover(
-            new_book.isbn,
-            new_book.title,
-            str(new_book.book_id)
+            new_book.isbn if new_book.isbn else "",
+            new_book.title if new_book.title else "",
+            str(new_book.book_id) if new_book.book_id else ""
             )
         book_list.append(
             new_book

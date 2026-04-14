@@ -54,9 +54,9 @@ class BookResponse(BaseModel):
     """
     book_id: int
     title: str
-    author: str
+    author: str|None
     publisher: str
-    isbn: str
+    isbn: str|None
     multi_version_num: Optional[int]
     cover: Optional[str]
     items: List[ItemResponse]

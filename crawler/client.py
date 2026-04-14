@@ -111,9 +111,9 @@ class OpacClient:
     
     def get_cover(
             self, 
-            isbn: str, 
-            title: str, 
-            book_id: str
+            isbn: str|None, 
+            title: str|None, 
+            book_id: str|None
             ) -> str:
         
         response = requests.get(

@@ -168,10 +168,14 @@ def opac_advanced_search_payload(query: AdvancedSearchQuery):
     "isOpen": False
 }
 
-def opac_cover_payload(isbn: str, title: str, book_id: str):
+def opac_cover_payload(
+        isbn: str|None, 
+        title: str|None, 
+        book_id: str|None
+        ):
 
     return {
-        "isbn": isbn,
+        "isbn": isbn if isbn else "",
         "title": title,
         "recordId": book_id
     }

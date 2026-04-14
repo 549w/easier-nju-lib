@@ -15,7 +15,8 @@ class OpacParser:
             barcode=item_dict.get("barcode"),
             current_location_code=item_dict.get("curLocationId"),
             process_type_code=item_dict.get("processTypeCode"),
-            circulation_attribute_code=item_dict.get("circAttr")
+            circulation_attribute_code=item_dict.get("circAttr"),
+
             )
         
         return new_item
@@ -31,7 +32,9 @@ class OpacParser:
             author=book_dict["author"],
             publisher=book_dict["publisher"],
             isbn=book_dict["isbn"],
-            multi_version_num=book_dict.get("multiVersionNum")
+            multi_version_num=book_dict.get("multiVersionNum"),
+            total_count=book_dict.get("physicalCount"),
+            on_shelf_count=book_dict.get("onShelfCountI"),
             )
         
         new_book.abstract = book_dict.get("abstract")

@@ -9,6 +9,8 @@ with open('mappers/code_dict.json', 'r', encoding='utf-8') as _f:
     _code_dict_data = json.load(_f)
 with open('mappers/opac_search_field_para_list.json', 'r', encoding='utf-8') as _f:
     _para_list_data = json.load(_f)
+with open('mappers/location_list.json', 'r', encoding='utf-8') as _f:
+    _location_list_data = json.load(_f)
 
 CODE_TO_CAMPUS = {}
 CAMPUS_TO_CODE = {}
@@ -22,6 +24,10 @@ LOCATION_TO_CODE = {}
 for _l in _code_dict_data["data"]["locationId"]:
     CODE_TO_LOCATION[_l["code"]] = _l["name"]
     LOCATION_TO_CODE[_l["name"]] = _l["code"]
+
+LOCATION_ID_TO_CAMPUS_ID = {}
+for _l in _location_list_data["data"]["donateList"]:
+    LOCATION_ID_TO_CAMPUS_ID[_l["locationId"]] = _l["campusId"]
 
 CODE_TO_COUNTRY = {}
 COUNTRY_TO_CODE = {}

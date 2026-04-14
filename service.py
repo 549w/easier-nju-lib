@@ -136,9 +136,12 @@ def item_search(
         rows,
         sort_type
         )
-    items_data: Dict = items_raw["data"]
-    item_total: int = items_data["totalCount"]
-    item_results: List[Dict] = items_data["list"]
+    items_data = items_raw.get("data")
+    if not items_data:
+        return item_search_response_mapper(0, [])
+        
+    item_total: int = items_data.get("totalCount", 0)
+    item_results: List[Dict] = items_data.get("list", [])
     for item_dict in item_results:
         item_list.append(
             OpacParser().item_parser(item_dict)

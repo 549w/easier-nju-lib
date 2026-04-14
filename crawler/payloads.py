@@ -35,7 +35,7 @@ class SearchItem:
     searchFieldContent: str
 
 class AdvancedSearchQuery(BaseModel):
-    campusId: List[CampusID] = field(default_factory=list)
+    campusId: List[Optional[CampusID]] = field(default_factory=list)
     page: int = 1
     rows: int = 10
     searchItems: List[SearchItem] = field(default_factory=list)
@@ -75,7 +75,7 @@ class AdvancedSearchQueryBuilder:
             )
     def set_campus(
             self, 
-            campus_list: List[CampusID]
+            campus_list: List[Optional[CampusID]]
             ) -> None:
         self.query.campusId.extend(campus_list)
 
@@ -125,6 +125,10 @@ def opac_advanced_search_payload(query: AdvancedSearchQuery):
     query_json = query.model_dump(
         mode="json"
     )
+    campus_id = query_json.get("campusId", [])
+    if campus_id == [None]:
+        campus_id = []
+    
     return {
     "docCode": [
         None
@@ -140,7 +144,7 @@ def opac_advanced_search_payload(query: AdvancedSearchQuery):
     "eCollectionIds": [],
     "neweCollectionIds": [],
     "curLocationId": [],
-    "campusId": query_json.get("campusId"),
+    "campusId": campus_id,
     "kindNo": [],
     "collectionName": [],
     "author": [],

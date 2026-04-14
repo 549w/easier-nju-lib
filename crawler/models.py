@@ -32,7 +32,9 @@ class Book:
             author: str,
             publisher: str,
             isbn: str,
-            multi_version_num: int|None
+            multi_version_num: int|None,
+            total_count: int|None,
+            on_shelf_count: int|None,
             ):
         self.book_id: int = book_id
         self.title: str = title
@@ -45,3 +47,5 @@ class Book:
         self.items_count: int|None = None
         self.abstract: str|None = None
         self.language_code: str|None = None
+        self.total_count: int|None = total_count
+        self.on_shelf_count: int|None = on_shelf_count

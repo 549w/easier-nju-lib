@@ -16,7 +16,7 @@ class SearchItemModel(BaseModel):
     searchFieldContent: str
 
 class SemanticFrameModel(BaseModel):
-    campusId: List[CampusID]
+    campusId: List[Optional[CampusID]]
     searchItems: List[SearchItemModel]
 
     @model_validator(mode="after")
@@ -41,8 +41,12 @@ class ItemResponse(BaseModel):
     call_no: str|None
     barcode: str|None
     current_location_code: Optional[int]
+    current_location_name: Optional[str]
     process_type_code: Optional[int]
+    process_type_name: Optional[str]
     circulation_attribute_code: Optional[str]
+    circulation_attribute_name: Optional[str]
+    campus_id: Optional[int]
 
 class BookResponse(BaseModel):
     """
@@ -58,6 +62,8 @@ class BookResponse(BaseModel):
     items: List[ItemResponse]
     abstract: Optional[str]
     language_code: Optional[str]
+    total_count: Optional[int]
+    on_shelf_count: Optional[int]
 
 class BookSearchResponse(BaseModel):
     """

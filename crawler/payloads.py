@@ -34,8 +34,7 @@ class SearchItem:
     matchMode: MatchMode
     searchFieldContent: str
 
-@dataclass
-class AdvancedSearchQuery:
+class AdvancedSearchQuery(BaseModel):
     campusId: List[CampusID] = field(default_factory=list)
     page: int = 1
     rows: int = 10
@@ -45,6 +44,9 @@ class AdvancedSearchQueryBuilder:
     def __init__(self):
         self.query = AdvancedSearchQuery()
     
+    def build(self) -> AdvancedSearchQuery:
+        return self.query
+
     def set_page(
             self, 
             page: int
@@ -120,6 +122,9 @@ def opac_search_payload(keyword: str, page: int = 1, rows: int = 15):
     }
 def opac_advanced_search_payload(query: AdvancedSearchQuery):
 
+    query_json = query.model_dump(
+        mode="json"
+    )
     return {
     "docCode": [
         None
@@ -135,7 +140,7 @@ def opac_advanced_search_payload(query: AdvancedSearchQuery):
     "eCollectionIds": [],
     "neweCollectionIds": [],
     "curLocationId": [],
-    "campusId": query.campusId,
+    "campusId": query_json.get("campusId"),
     "kindNo": [],
     "collectionName": [],
     "author": [],
@@ -149,10 +154,10 @@ def opac_advanced_search_payload(query: AdvancedSearchQuery):
     "group": [],
     "sortField": "relevance",
     "sortClause": "asc",
-    "page": query.page,
-    "rows": query.rows,
+    "page": query_json.get("page"),
+    "rows": query_json.get("rows"),
     "onlyOnShelf": None,
-    "searchItems": query.searchItems,
+    "searchItems": query_json.get("searchItems"),
     "searchFieldContent": "",
     "searchField": "keyWord",
     "searchFieldList": None,
@@ -167,14 +172,14 @@ def opac_cover_payload(isbn: str, title: str, book_id: str):
         "recordId": book_id
     }
 
-def opac_collection_payload(book_id: str, num: int):
+def opac_items_payload(book_id: str, page: int, rows: int, sort_type: int = 0):
     
     return {
-        "page": 1,
-        "rows": num, # 这玩意应该从响应体的 totalCount 中获取
+        "page": page,
+        "rows": rows, # 这玩意应该从响应体的 totalCount 中获取
         "entrance": None,
         "recordId": book_id,
         "isUnify": True,
-        "sortType": 0,
+        "sortType": sort_type,
         "callNo": ""
     }

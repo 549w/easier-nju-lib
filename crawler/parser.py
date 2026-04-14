@@ -10,14 +10,14 @@ class OpacParser:
             item_dict: dict
             ) -> Item:
         new_item: Item = Item(
-            item_id=item_dict["itemId"],
-            call_no=item_dict["callNo"],
-            barcode=item_dict["barcode"]
+            item_id=item_dict.get("itemId"),
+            call_no=item_dict.get("callNo"),
+            barcode=item_dict.get("barcode"),
+            current_location_code=item_dict.get("curLocationId"),
+            process_type_code=item_dict.get("processTypeCode"),
+            circulation_attribute_code=item_dict.get("circAttr")
             )
         
-        new_item.current_location_code = item_dict.get("curLocationId")
-        new_item.process_type_code = item_dict.get("processTypeCode")
-        new_item.circulation_attribute_code = item_dict.get("circAttr")
         return new_item
     
     def book_parser(

@@ -6,16 +6,19 @@ class Item:
     """
     def __init__(
             self,
-            item_id: str, # 系统内部id，对应源数据中的"itemId"
-            call_no: str, # 索书号，对应"callNo"
-            barcode: str, # 条码号，对应"barcode"
+            item_id: str|None, # 系统内部id，对应源数据中的"itemId"
+            call_no: str|None, # 索书号，对应"callNo"
+            barcode: str|None, # 条码号，对应"barcode"
+            current_location_code: int|None,
+            process_type_code: int|None,
+            circulation_attribute_code: str|None,
             ):
-        self.item_id: str = item_id
-        self.call_no: str = call_no
-        self.barcode: str = barcode
-        self.current_location_code: int|None = None # 当前馆藏地，对应源数据中的"curLocationId"
-        self.process_type_code: int|None = None # 当前状态，对应"processTypeCode"
-        self.circulation_attribute_code: str|None = None # 流通属性，对应"circAttr"
+        self.item_id: str|None = item_id
+        self.call_no: str|None = call_no
+        self.barcode: str|None = barcode
+        self.current_location_code: int|None = current_location_code # 当前馆藏地，对应源数据中的"curLocationId"
+        self.process_type_code: int|None = process_type_code # 当前状态，对应"processTypeCode"
+        self.circulation_attribute_code: str|None = circulation_attribute_code # 流通属性，对应"circAttr"
 
 class Book:
     """
@@ -39,5 +42,6 @@ class Book:
         self.multi_version_num: int|None = multi_version_num
         self.cover: str|None = None
         self.items: List[Item] = []
+        self.items_count: int|None = None
         self.abstract: str|None = None
         self.language_code: str|None = None

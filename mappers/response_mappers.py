@@ -11,7 +11,7 @@ def item_response_mapper(
         ) -> ItemResponse:
     
     return ItemResponse(
-        item_id=item.item_id,
+        item_id=int(item.item_id) if item.item_id else None,
         call_no=item.call_no,
         barcode=item.barcode,
         current_location_code

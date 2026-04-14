@@ -18,7 +18,7 @@ from exceptions import NetworkError
 from crawler.payloads import (
     opac_search_payload, 
     opac_advanced_search_payload, 
-    opac_collection_payload, 
+    opac_items_payload, 
     opac_cover_payload,
     Oper,
     SearchField,
@@ -69,26 +69,38 @@ class OpacClient:
 
         self.response_check(response_dict)
         return response.json()
-
-    def get_collections(self, book_id: str) -> Dict:
-
-        # 预请求
-        pre_response = requests.post(
+    
+    def get_items_count(
+            self,
+            book_id: str
+    ) -> int:
+        """
+        获取书目项数量。
+        :param book_id: 书目项 id
+        :return: 书目项数量
+        """
+        response = requests.post(
             OPAC_BASE_URL + OPAC_COLLECTION_API,
-            json = opac_collection_payload(book_id, 1),
+            json = opac_items_payload(book_id, 1, 1),
             headers = OPAC_HEADERS,
             verify = False
             )
         
-        pre_response_dict = pre_response.json()
+        response_dict = response.json()
 
-        self.response_check(pre_response_dict)
-
-        total_count = pre_response_dict["data"]["totalCount"]
+        self.response_check(response_dict)
+        return response_dict["data"]["totalCount"]
+    def get_items(
+            self, 
+            book_id: str, 
+            page: int = 1, 
+            rows: int = 15, 
+            sort_type: int = 0
+            ) -> Dict:
         
         response = requests.post(
             OPAC_BASE_URL + OPAC_COLLECTION_API,
-            json = opac_collection_payload(book_id, total_count),
+            json = opac_items_payload(book_id, 1, rows, sort_type),
             headers = OPAC_HEADERS,
             verify = False
             )
@@ -97,7 +109,12 @@ class OpacClient:
         self.response_check(response_dict)
         return response_dict
     
-    def get_cover(self, isbn: str, title: str, book_id: str) -> str:
+    def get_cover(
+            self, 
+            isbn: str, 
+            title: str, 
+            book_id: str
+            ) -> str:
         
         response = requests.get(
             OPAC_BASE_URL + OPAC_COVER_API,
@@ -106,7 +123,7 @@ class OpacClient:
             )
         
         response_dict = response.json()
-        print(response_dict)
+        #print(response_dict)
 
         self.response_check(response_dict)
 

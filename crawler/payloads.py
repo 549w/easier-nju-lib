@@ -3,6 +3,7 @@ from mappers.code_mappers import MATCH_MODE_TO_CODE
 from dataclasses import dataclass, field
 from typing import List, Optional
 from enum import Enum
+from pydantic import BaseModel, model_validator
 
 class Oper(Enum):
     AND = "AND"

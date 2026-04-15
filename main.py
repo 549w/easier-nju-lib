@@ -1,48 +1,24 @@
 import sqlite3
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from api.search import router as search_router
+from api.search_api import router as search_router
 
-# 数据库初始化
-conn = sqlite3.connect("data.db")
-cursor = conn.cursor()
-cursor.executescript("""
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        email TEXT UNIQUE,
-        password_hash TEXT,
-        quota INTEGER DEFAULT 5
-    );
-    CREATE TABLE IF NOT EXISTS email_codes (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        email TEXT NOT NULL,
-        code TEXT NOT NULL,
-        expire_at TIMESTAMP NOT NULL,
-        used INTEGER DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-    CREATE TABLE IF NOT EXISTS invite_codes (
-        code TEXT PRIMARY KEY,
-        quota_bonus INTEGER NOT NULL,
-        used INTEGER DEFAULT 0
-    );
-    CREATE TABLE IF NOT EXISTS usage_logs (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        email TEXT NOT NULL,
-        user_prompt TEXT NOT NULL,
-        prompt_tokens INTEGER NOT NULL,
-        completion_tokens INTEGER NOT NULL,
-        finish_reason TEXT NOT NULL,
-        completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        completion_id TEXT NOT NULL,
-        completion_model TEXT NOT NULL
-    );
-""")
+from db.init_db import init_db
+from db.connection import get_connection
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(
+    app: FastAPI
+):
+    conn = get_connection()
+    init_db(conn)
+    conn.close
+    yield
+
+app = FastAPI(lifespan=lifespan)
 
 # 挂载静态文件
 app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")

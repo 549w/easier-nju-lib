@@ -1,31 +1,41 @@
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT UNIQUE,
-    password_hash TEXT,
-    quota INTEGER DEFAULT 5
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    quota INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE TABLE IF NOT EXISTS email_codes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT NOT NULL,
+    user_id INTEGER NOT NULL,
     code TEXT NOT NULL,
     expire_at TIMESTAMP NOT NULL,
     used INTEGER DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 CREATE TABLE IF NOT EXISTS invite_codes (
-    code TEXT PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    code_hash TEXT UNIQUE,
     quota_bonus INTEGER NOT NULL,
-    used INTEGER DEFAULT 0
+    used INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    creator_id INTEGER NOT NULL,
+    used_at TIMESTAMP,
+    user_id INTEGER,
+    FOREIGN KEY (creator_id) REFERENCES users(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 CREATE TABLE IF NOT EXISTS usage_logs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    email TEXT NOT NULL,
+    user_id INTEGER NOT NULL,
     user_prompt TEXT NOT NULL,
     prompt_tokens INTEGER NOT NULL,
     completion_tokens INTEGER NOT NULL,
     finish_reason TEXT NOT NULL,
     completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     completion_id TEXT NOT NULL,
-    completion_model TEXT NOT NULL
+    completion_model TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );

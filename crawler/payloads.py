@@ -35,7 +35,7 @@ class SearchItem:
     searchFieldContent: str
 
 class AdvancedSearchQuery(BaseModel):
-    campusId: List[Optional[CampusID]] = field(default_factory=list)
+    campusId: List[CampusID | None] = field(default_factory=list)
     page: int = 1
     rows: int = 10
     searchItems: List[SearchItem] = field(default_factory=list)
@@ -75,7 +75,7 @@ class AdvancedSearchQueryBuilder:
             )
     def set_campus(
             self, 
-            campus_list: List[Optional[CampusID]]
+            campus_list: List[CampusID | None]
             ) -> None:
         self.query.campusId.extend(campus_list)
 

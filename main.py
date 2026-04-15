@@ -1,5 +1,5 @@
 import sqlite3
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -17,6 +17,10 @@ from schemas import (
     ItemSearchResponse
 )
 from crawler.payloads import AdvancedSearchQuery
+
+from exceptions import (
+    LLMError
+)
 
 conn = sqlite3.connect("data.db")
 cursor = conn.cursor()
@@ -44,12 +48,12 @@ cursor.executescript("""
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         email TEXT NOT NULL,
-        user_prompt TEXT NOT NULL
+        user_prompt TEXT NOT NULL,
         prompt_tokens INTEGER NOT NULL,
         completion_tokens INTEGER NOT NULL,
         finish_reason TEXT NOT NULL,
-        completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        completion_id TEXT NOT NULL
+        completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        completion_id TEXT NOT NULL,
         completion_model TEXT NOT NULL
     );
 """)
@@ -73,7 +77,15 @@ async def serve_index():
 
 @app.post("/search/books/llm_query", response_model=NLSearchResponse)
 async def search_books_normal_query(request: SearchBookRequest):
-    semantic_frame = intent_phrase_to_semantic_frame(request.intent_phrase)
+    try:
+        semantic_frame: SemanticFrameModel = intent_phrase_to_semantic_frame(request.intent_phrase)
+        #print(semantic_frame)
+    except LLMError as e:
+        raise HTTPException(
+            status_code=400, 
+            detail=str(e)
+            )
+    
     query = semantic_frame_to_query(semantic_frame, request.page, request.rows)
     search_result = book_search(query)
     return NLSearchResponse(query=query, result=search_result)

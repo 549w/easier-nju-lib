@@ -15,16 +15,16 @@ createApp({
         // 状态颜色和图标映射
         const getStatusStyle = (statusName) => {
             const styles = {
-                '可借': { class: 'bg-green-100 text-green-800', icon: 'check_circle' },
-                '在架': { class: 'bg-green-100 text-green-800', icon: 'pin_drop' },
-                '签收': { class: 'bg-green-100 text-green-800', icon: 'inventory_2' },
-                '借出': { class: 'bg-orange-100 text-orange-800', icon: 'schedule' },
+                '可借': { class: 'bg-green-100 text-green-800', icon: 'check' },
+                '在架': { class: 'bg-green-100 text-green-800', icon: 'newsstand' },
+                '签收': { class: 'bg-green-100 text-green-800', icon: 'inventory' },
+                '借出': { class: 'bg-orange-100 text-orange-800', icon: 'block' },
                 '委托借出': { class: 'bg-orange-100 text-orange-800', icon: 'handshake' },
-                '阅览': { class: 'bg-blue-100 text-blue-800', icon: 'menu_book' },
-                '装订中': { class: 'bg-blue-100 text-blue-800', icon: 'build' },
-                '交接': { class: 'bg-blue-100 text-blue-800', icon: 'sync' },
-                '上委托书架': { class: 'bg-yellow-100 text-yellow-800', icon: 'input' },
-                '下架': { class: 'bg-red-100 text-red-800', icon: 'block' },
+                '阅览': { class: 'bg-blue-100 text-blue-800', icon: 'import_contacts' },
+                '装订中': { class: 'bg-blue-100 text-blue-800', icon: 'attach_file' },
+                '交接': { class: 'bg-blue-100 text-blue-800', icon: 'transform' },
+                '上委托书架': { class: 'bg-yellow-100 text-yellow-800', icon: 'shelves' },
+                '下架': { class: 'bg-red-100 text-red-800', icon: 'do_not_disturb_on' },
                 '正常': { class: 'bg-green-50 text-green-700', icon: 'auto_awesome' },
                 '编目中': { class: 'bg-blue-50 text-blue-700', icon: 'edit_note' }
             };
@@ -81,8 +81,8 @@ createApp({
                     _itemsTotal: 0
                 }));
             } catch (error) {
-                console.error('搜索出错:', error);
-                errorMessage.value = error.message;
+                console.error(error);
+                errorMessage.value = "无法理解你的搜索意图💔";
             } finally {
                 isSearching.value = false;
                 searched.value = true;

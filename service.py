@@ -29,6 +29,10 @@ from dataclasses import dataclass, field
 from typing import List, Dict
 from openai import OpenAI
 import json
+from exceptions import (
+    QueryValidationError,
+    LLMError
+)
 
 def intent_phrase_to_semantic_frame(
         intent_phrase: str
@@ -37,7 +41,6 @@ def intent_phrase_to_semantic_frame(
         api_key=DASHSCOPE_API_KEY,
         base_url=MODEL_BASE_URL,
         )
-    
     completion = client.chat.completions.create(
         model=MODEL_NAME,
         messages=[
@@ -60,19 +63,19 @@ def intent_phrase_to_semantic_frame(
     #print(completion.model)
     #print(type(completion.choices[0].message.content))
     if not completion.usage:
-        raise RuntimeError("Usage is None")
-    if not completion.choices[0].finish_reason:
-        raise RuntimeError("Finish reason is None")
+        raise LLMError("无使用数据")
+    if completion.choices[0].finish_reason != "stop":
+        raise LLMError(f"结束原因异常，为{completion.choices[0].finish_reason}")
     if not completion.choices[0].message.content:
-        raise RuntimeError("Content is None")
+        raise LLMError("无输出")
     completion_tokens: int = completion.usage.completion_tokens
     content: str = completion.choices[0].message.content
     content_dict: Dict = json.loads(content)
     try:
         return SemanticFrameModel(**content_dict)
     except Exception as e:
-        print("LLM输出不合法:", content)
-        raise
+        #print("LLM输出不合法:", content)
+        raise LLMError(e)
 
 def semantic_frame_to_query(
         semantic_frame: SemanticFrameModel,

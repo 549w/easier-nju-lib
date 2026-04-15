@@ -29,7 +29,7 @@ INSTRUCTION = ("这是一个小应用，希望帮你更方便地查找NJU图书�
 
 SYSTEM_PROMPT = (
     '''
-你是图书馆检索解析器。将自然语言转为JSON框架。
+你是图书馆检索解析器。将自然语言转为JSON框架。必须返回至少一个searchItem。
 
 【SearchField】
 "title" | "author" | "publisher"

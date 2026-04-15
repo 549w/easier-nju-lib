@@ -13,7 +13,6 @@ from config.magic_params import (
     MAGIC_PARAMS, 
     OPAC_HEADERS
     )
-from exceptions import NetworkError
 
 from crawler.payloads import (
     opac_search_payload, 
@@ -26,6 +25,10 @@ from crawler.payloads import (
     CampusID,
     AdvancedSearchQueryBuilder,
     AdvancedSearchQuery
+)
+
+from exceptions import (
+    ClientError
 )
 
 class OpacClient:
@@ -41,7 +44,7 @@ class OpacClient:
         :return: None
         """
         if not response_dict['success']:
-            raise NetworkError(f'OPAC brief search failed.')
+            raise ClientError(f'OPAC 搜索失败。')
     def brief_search(self, keyword: str, num: int = 15) -> Dict:
         
         response = requests.post(

@@ -10,17 +10,17 @@ from crawler.payloads import (
 )
 
 class SearchItemModel(BaseModel):
-    oper: Optional[Oper]
+    oper: Oper | None
     searchField: SearchField
     matchMode: MatchMode
     searchFieldContent: str
 
 class SemanticFrameModel(BaseModel):
-    campusId: List[Optional[CampusID]]
+    campusId: List[CampusID | None]
     searchItems: List[SearchItemModel]
 
     @model_validator(mode="after")
-    def check_oper_rule(self):
+    def check_rule(self):
         if not self.searchItems:
             raise ValueError("searchItems 不能为空")
 
@@ -30,6 +30,11 @@ class SemanticFrameModel(BaseModel):
         for i in range(1, len(self.searchItems)):
             if self.searchItems[i].oper is None:
                 raise ValueError(f"第{i}个 oper 不能为 None")
+            
+        for i, item in enumerate(self.searchItems):
+            if self.searchItems[i].searchFieldContent is None or self.searchItems[i].searchFieldContent.strip() == "":
+                print("=============")
+                raise ValueError(f"第{i}个 searchFieldContent 不能为空")
 
         return self
 
@@ -40,13 +45,13 @@ class ItemResponse(BaseModel):
     item_id: int|None
     call_no: str|None
     barcode: str|None
-    current_location_code: Optional[int]
-    current_location_name: Optional[str]
-    process_type_code: Optional[int]
-    process_type_name: Optional[str]
-    circulation_attribute_code: Optional[str]
-    circulation_attribute_name: Optional[str]
-    campus_id: Optional[int]
+    current_location_code: int | None
+    current_location_name: str | None
+    process_type_code: int | None
+    process_type_name: str | None
+    circulation_attribute_code: str | None
+    circulation_attribute_name: str | None
+    campus_id: int | None
 
 class BookResponse(BaseModel):
     """
@@ -55,15 +60,15 @@ class BookResponse(BaseModel):
     book_id: int
     title: str
     author: str|None
-    publisher: str
+    publisher: str|None
     isbn: str|None
-    multi_version_num: Optional[int]
-    cover: Optional[str]
+    multi_version_num: int|None
+    cover: str | None
     items: List[ItemResponse]
-    abstract: Optional[str]
-    language_code: Optional[str]
-    total_count: Optional[int]
-    on_shelf_count: Optional[int]
+    abstract: str | None
+    language_code: str | None
+    total_count: int | None
+    on_shelf_count: int | None
 
 class BookSearchResponse(BaseModel):
     """

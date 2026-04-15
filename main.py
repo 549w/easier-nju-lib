@@ -42,8 +42,15 @@ cursor.executescript("""
     );
     CREATE TABLE IF NOT EXISTS usage_logs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         email TEXT NOT NULL,
         user_prompt TEXT NOT NULL
+        prompt_tokens INTEGER NOT NULL,
+        completion_tokens INTEGER NOT NULL,
+        finish_reason TEXT NOT NULL,
+        completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        completion_id TEXT NOT NULL
+        completion_model TEXT NOT NULL
     );
 """)
 

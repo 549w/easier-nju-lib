@@ -76,7 +76,7 @@ test_*.py
 
 crawler/examples/
 
-!code_dict.json
+!mappers/*.json
 
 # SQLite database
 *.db

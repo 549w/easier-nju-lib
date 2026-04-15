@@ -1,0 +1,118 @@
+{
+    "success": true,
+    "message": "操作成功",
+    "errCode": 200,
+    "errorCode": null,
+    "data": [
+        {
+            "id": 1,
+            "searchField": "题名",
+            "defaultMatchMode": 2,
+            "useFlag": "1",
+            "createBy": -1,
+            "createDate": null,
+            "updateBy": -1,
+            "updateDate": null,
+            "seq": 1
+        },
+        {
+            "id": 2,
+            "searchField": "责任者",
+            "defaultMatchMode": 1,
+            "useFlag": "1",
+            "createBy": -1,
+            "createDate": null,
+            "updateBy": -1,
+            "updateDate": null,
+            "seq": 2
+        },
+        {
+            "id": 3,
+            "searchField": "主题",
+            "defaultMatchMode": 1,
+            "useFlag": "1",
+            "createBy": -1,
+            "createDate": null,
+            "updateBy": -1,
+            "updateDate": null,
+            "seq": 3
+        },
+        {
+            "id": 4,
+            "searchField": "标准号",
+            "defaultMatchMode": 1,
+            "useFlag": "1",
+            "createBy": -1,
+            "createDate": null,
+            "updateBy": -1,
+            "updateDate": null,
+            "seq": 4
+        },
+        {
+            "id": 5,
+            "searchField": "分类号",
+            "defaultMatchMode": 2,
+            "useFlag": "1",
+            "createBy": -1,
+            "createDate": null,
+            "updateBy": -1,
+            "updateDate": null,
+            "seq": 5
+        },
+        {
+            "id": 6,
+            "searchField": "索书号",
+            "defaultMatchMode": 3,
+            "useFlag": "1",
+            "createBy": -1,
+            "createDate": null,
+            "updateBy": -1,
+            "updateDate": null,
+            "seq": 6
+        },
+        {
+            "id": 7,
+            "searchField": "出版社",
+            "defaultMatchMode": 2,
+            "useFlag": "1",
+            "createBy": -1,
+            "createDate": null,
+            "updateBy": -1,
+            "updateDate": null,
+            "seq": 7
+        },
+        {
+            "id": 8,
+            "searchField": "摘要",
+            "defaultMatchMode": 2,
+            "useFlag": "1",
+            "createBy": -1,
+            "createDate": null,
+            "updateBy": -1,
+            "updateDate": null,
+            "seq": 8
+        },
+        {
+            "id": 9,
+            "searchField": "条码号",
+            "defaultMatchMode": 1,
+            "useFlag": "1",
+            "createBy": -1,
+            "createDate": null,
+            "updateBy": -1,
+            "updateDate": null,
+            "seq": 9
+        },
+        {
+            "id": 10,
+            "searchField": "工具号",
+            "defaultMatchMode": 1,
+            "useFlag": "1",
+            "createBy": -1,
+            "createDate": null,
+            "updateBy": -1,
+            "updateDate": null,
+            "seq": 10
+        }
+    ]
+}

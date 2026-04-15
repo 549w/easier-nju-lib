@@ -77,15 +77,24 @@ async def serve_index():
 
 @app.post("/search/books/llm_query", response_model=NLSearchResponse)
 async def search_books_normal_query(request: SearchBookRequest):
+    # 验证搜索词长度不超过50字
+    if len(request.intent_phrase.strip()) > 50:
+        raise HTTPException(
+            status_code=400,
+            detail="搜索词不能超过50个字"
+        )
+    
     try:
-        semantic_frame: SemanticFrameModel = intent_phrase_to_semantic_frame(request.intent_phrase)
+        semantic_frame: SemanticFrameModel = intent_phrase_to_semantic_frame(
+            request.intent_phrase.strip()
+            )
         #print(semantic_frame)
     except LLMError as e:
         raise HTTPException(
-            status_code=400, 
+            status_code=400,
             detail=str(e)
             )
-    
+
     query = semantic_frame_to_query(semantic_frame, request.page, request.rows)
     search_result = book_search(query)
     return NLSearchResponse(query=query, result=search_result)

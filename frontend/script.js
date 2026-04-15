@@ -12,6 +12,16 @@ createApp({
         const total = ref(0)
         const currentQuery = ref(null) // 存储从 /nl 返回的结构化 query
 
+        // 计算输入字符数
+        const charCount = Vue.computed(() => {
+            return intentPhrase.value.length
+        })
+
+        // 判断是否可以搜索（非空且不超过50字）
+        const canSearch = Vue.computed(() => {
+            return intentPhrase.value.trim() && charCount.value <= 50
+        })
+
         // 状态颜色和图标映射
         const getStatusStyle = (statusName) => {
             const styles = {
@@ -192,6 +202,8 @@ createApp({
             errorMessage,
             books,
             total,
+            charCount,
+            canSearch,
             getStatusStyle,
             isPreferredCampus,
             searchBooksNL,

@@ -49,11 +49,17 @@
         <!-- 搜索框区域 -->
         <div
             class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8 flex flex-col sm:flex-row gap-4 items-center">
-            <input type="text" v-model="intentPhrase" @keyup.enter="searchBooksNL"
-                placeholder="A sentence is all you need!"
-                class="flex-1 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                :disabled="isSearching">
-            <button @click="searchBooksNL" :disabled="!intentPhrase.trim() || isSearching"
+            <div class="flex-1 w-full relative">
+                <input type="text" v-model="intentPhrase" @keyup.enter="searchBooksNL"
+                    placeholder="A sentence is all you need!"
+                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-16"
+                    :disabled="isSearching">
+                <div class="absolute right-3 top-1/2 -translate-y-1/2 text-xs"
+                    :class="charCount > 50 ? 'text-red-500 font-semibold' : 'text-gray-400'">
+                    {{ charCount }}/50
+                </div>
+            </div>
+            <button @click="searchBooksNL" :disabled="!canSearch || isSearching"
                 class="w-full sm:w-auto px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center justify-center min-w-[120px]">
                 <span v-if="isSearching">
                     <svg class="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"

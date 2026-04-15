@@ -42,7 +42,7 @@ cursor.executescript("""
     );
     CREATE TABLE IF NOT EXISTS usage_logs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        email INTEGER NOT NULL,
+        email TEXT NOT NULL,
         user_prompt TEXT NOT NULL
     );
 """)

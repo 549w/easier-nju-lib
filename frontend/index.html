@@ -152,9 +152,12 @@
         }
 
         @keyframes blink {
-            0%, 100% {
+
+            0%,
+            100% {
                 opacity: 1;
             }
+
             50% {
                 opacity: 0.2;
             }
@@ -162,6 +165,63 @@
 
         .blink {
             animation: blink 1.6s infinite;
+        }
+
+        /* 卡片栈样式 */
+        .card-stack-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        .book-card {
+            width: min(90vw, 420px);
+            height: min(80vh, 720px);
+            max-width: 420px;
+            max-height: 720px;
+            margin-right: 24px;
+        }
+
+        .card-track {
+            touch-action: pan-y;
+        }
+
+        /* 卡片内容样式 */
+        .card-content {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* 卡片翻面样式 */
+        .card-container {
+            position: relative;
+            perspective: 1000px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .card-front,
+        .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            transition: transform 0.6s;
+        }
+
+        .card-front {
+            transform: rotateY(0deg);
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+        }
+
+        .card-container.flipped .card-front {
+            transform: rotateY(180deg);
+        }
+
+        .card-container.flipped .card-back {
+            transform: rotateY(0deg);
         }
     </style>
     <!-- 打字动画脚本 -->
@@ -202,273 +262,324 @@
     </script>
 </head>
 
-<body class="bg-light min-h-screen text-dark font-serif">
-    <div id="app" v-cloak class="max-w-4xl mx-auto p-4 sm:p-8">
+<body class="bg-light min-h-screen text-dark font-serif relative overflow-hidden">
+    <div id="app" v-cloak class="w-full h-screen flex flex-col">
 
-        <!-- 回到旧版和GitHub链接 -->
-        <div class="mb-6 flex justify-between items-center">
-            <a href="https://lib-classic.imjhy.com" target="_blank" rel="noopener noreferrer"
-                class="text-sm text-primary hover:underline transition">
-                ← 回到旧版
-            </a>
-            <a href="https://github.com/549w/easier-nju-lib" target="_blank" rel="noopener noreferrer"
-                class="text-sm text-primary hover:underline transition flex items-center">
-                <span class="material-symbols-outlined mr-1 text-xs">code</span>
-                GitHub 仓库
-            </a>
+        <!-- 头部 - 右上角只显示不南搜 -->
+        <header
+            class="absolute top-0 left-0 right-0 z-20 bg-light/90 backdrop-blur-sm border-b border-gray-200 py-4 px-4 sm:px-8">
+            <div class="max-w-6xl mx-auto flex justify-between items-center">
+                <div class="flex items-center">
+                    <h1 class="text-xl sm:text-2xl font-bold text-primary font-serif">不南搜</h1>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="https://lib-classic.imjhy.com" target="_blank" rel="noopener noreferrer"
+                        class="text-sm text-primary hover:underline transition">
+                        ← 回到旧版
+                    </a>
+                    <a href="https://github.com/549w/easier-nju-lib" target="_blank" rel="noopener noreferrer"
+                        class="text-sm text-primary hover:underline transition flex items-center">
+                        <span class="material-symbols-outlined mr-1 text-xs">code</span>
+                        GitHub 仓库
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- 中间标题和逐字动画 - 只在未展示搜索结果时显示 -->
+        <div v-if="!total" class="flex-grow flex flex-col items-center justify-center px-4">
+            <div class="text-center">
+                <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-primary font-serif mb-4">不南搜 Easier NJU Lib
+                </h1>
+                <p class="text-gray-500 italic text-xs sm:text-sm md:text-base">
+                    <span class="typing-animation" id="typing-text"></span>
+                </p>
+            </div>
         </div>
 
         <!-- 限时开放测试提示 -->
-        <div class="bg-secondary/10 border border-secondary/20 rounded-lg p-3 mb-6 text-center">
-            <p class="text-sm text-secondary font-medium">限时开放测试。欢迎加入QQ交流群了解更多：<span class="font-bold">299857244</span>
-            </p>
-        </div>
-
-        <!-- 头部 -->
-        <header class="text-center mb-6 mt-4 sm:mb-8 sm:mt-6">
-            <div class="flex items-center justify-center mb-2 flex-col sm:flex-row">
-                <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-primary font-serif">不南搜 Easier NJU Lib</h1>
+        <div class="absolute top-16 left-0 right-0 z-10 bg-secondary/10 border-b border-secondary/20 py-2 px-4 sm:px-8">
+            <div class="max-w-6xl mx-auto text-center">
+                <p class="text-sm text-secondary font-medium">限时开放测试。欢迎加入QQ交流群了解更多：<span
+                        class="font-bold">299857244</span>
+                </p>
             </div>
-            <p class="text-gray-500 italic text-xs sm:text-sm md:text-base">
-                <span class="typing-animation" id="typing-text"></span>
-            </p>
-        </header>
-
-        <!-- 搜索框区域 -->
-        <div
-            class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 mb-6 sm:mb-8 flex flex-col sm:flex-row gap-3 sm:gap-4 items-center card-hover">
-            <div class="flex-1 w-full relative">
-                <input type="text" v-model="intentPhrase" @keyup.enter="searchBooksNL"
-                    placeholder="A sentence is all you need!"
-                    class="w-full pl-3 sm:pl-4 pr-14 sm:pr-16 py-2.5 sm:py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition input-focus"
-                    :disabled="isSearching">
-                <div class="absolute right-3 top-1/2 -translate-y-1/2 text-xs"
-                    :class="charCount > 50 ? 'text-danger font-semibold' : 'text-gray-400'">
-                    {{ charCount }}/50
-                </div>
-            </div>
-            <button @click="searchBooksNL" :disabled="!canSearch || isSearching"
-                class="w-10 sm:w-12 h-10 sm:h-12 bg-primary hover:bg-secondary text-white rounded-full transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center btn-hover"
-                v-bind:class="{ 'blink': isSearching }">
-                <span class="flex items-center justify-center">
-                    <span class="material-symbols-outlined">arrow_upward</span>
-                </span>
-            </button>
         </div>
 
         <!-- 错误提示 -->
-        <div v-if="errorMessage"
-            class="mb-6 p-4 bg-danger/10 border border-danger/20 text-danger rounded-lg flex items-center shadow-sm">
-            <span class="material-symbols-outlined mr-3 flex-shrink-0">error</span>
-            <span class="text-sm font-medium">{{ errorMessage }}</span>
-            <button @click="errorMessage = ''"
-                class="ml-auto text-danger/60 hover:text-danger transition flex items-center transform hover:scale-110 active:scale-90">
-                <span class="material-symbols-outlined text-lg">close</span>
-            </button>
-        </div>
-
-
-        <!-- AI 搜索示例 -->
-        <div class="mb-6 sm:mb-8">
-            <p class="text-xs sm:text-sm text-gray-500 mb-2 flex items-center">
-                <span class="material-symbols-outlined text-primary mr-1 text-sm sm:text-base">lightbulb</span>
-                尝试这样搜索
-            </p>
-            <div class="flex flex-wrap gap-2">
-                <button @click="intentPhrase = '鼓楼或者仙林的朱光潜、宗白华、李泽厚的书'"
-                    class="px-2 sm:px-3 py-1 text-xs bg-primary/10 text-primary rounded-full hover:bg-primary/20 transition transform hover:scale-105 active:scale-95">
-                    鼓楼或者仙林的朱光潜、宗白华、李泽厚的书
-                </button>
-                <button @click="intentPhrase = '董乐山翻译的一九八四，鼓楼的'"
-                    class="px-2 sm:px-3 py-1 text-xs bg-primary/10 text-primary rounded-full hover:bg-primary/20 transition transform hover:scale-105 active:scale-95">
-                    董乐山翻译的一九八四，鼓楼的
-                </button>
-                <button @click="intentPhrase = '苏州校区，人民文学出版社的史记'"
-                    class="px-2 sm:px-3 py-1 text-xs bg-primary/10 text-primary rounded-full hover:bg-primary/20 transition transform hover:scale-105 active:scale-95">
-                    苏州校区，人民文学出版社的史记
+        <div v-if="errorMessage" class="absolute top-24 left-0 right-0 z-10 px-4 sm:px-8">
+            <div
+                class="max-w-6xl mx-auto p-4 bg-danger/10 border border-danger/20 text-danger rounded-lg flex items-center shadow-sm">
+                <span class="material-symbols-outlined mr-3 flex-shrink-0">error</span>
+                <span class="text-sm font-medium">{{ errorMessage }}</span>
+                <button @click="errorMessage = ''"
+                    class="ml-auto text-danger/60 hover:text-danger transition flex items-center transform hover:scale-110 active:scale-90">
+                    <span class="material-symbols-outlined text-lg">close</span>
                 </button>
             </div>
         </div>
 
+
         <!-- 搜索结果统计 -->
-        <div v-if="total > 0" class="mb-4 text-gray-600 text-sm">
-            共找到 <span class="font-semibold text-primary">{{ total }}</span> 条结果
-        </div>
-        <div v-if="searched && total === 0"
-            class="text-center py-12 text-gray-500 bg-white rounded-xl shadow-sm border border-gray-100">
-            <span class="material-symbols-outlined text-5xl text-gray-300 mb-3">sentiment_dissatisfied</span>
-            <p>没有找到相关的书籍，换个说法试试？</p>
+        <div v-if="total > 0" class="absolute top-24 left-0 right-0 z-10 px-4 sm:px-8">
+            <div class="max-w-6xl mx-auto text-gray-600 text-sm">
+                共找到 <span class="font-semibold text-primary">{{ total }}</span> 条结果
+            </div>
         </div>
 
-        <!-- 图书列表 -->
-        <div class="space-y-4">
-            <div v-for="book in books" :key="book.book_id"
-                class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer card-hover transform active:scale-98 transition-transform duration-200"
-                @click="toggleBookItems(book)">
-                <!-- 图书基本信息卡片 -->
-                <div class="p-4 sm:p-5 flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center">
-                    <!-- 封面 -->
-                    <div
-                        class="w-20 sm:w-24 h-28 sm:h-32 flex-shrink-0 bg-gray-100 rounded-lg flex flex-col items-center justify-center overflow-hidden border border-gray-200 shadow-sm transition-transform duration-300 hover:scale-105">
-                        <img v-if="book.cover" :src="book.cover" alt="封面" class="w-full h-full object-cover">
-                        <template v-else>
-                            <span class="material-symbols-outlined text-gray-300 text-2xl sm:text-3xl mb-1">image</span>
-                            <span class="text-gray-400 text-[10px]">暂无封面</span>
-                        </template>
-                    </div>
+        <!-- 无结果提示 -->
+        <div v-if="searched && total === 0" class="flex-grow flex items-center justify-center">
+            <div
+                class="text-center py-12 text-gray-500 bg-white rounded-xl shadow-sm border border-gray-100 px-4 sm:px-8 max-w-md">
+                <span class="material-symbols-outlined text-5xl text-gray-300 mb-3">sentiment_dissatisfied</span>
+                <p>没有找到相关的书籍，换个说法试试？</p>
+            </div>
+        </div>
 
-                    <!-- 详情 -->
-                    <div class="flex-1">
-                        <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-2 line-clamp-2">{{ book.title }}</h2>
-                        <div
-                            class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3">
-                            <p><span class="text-gray-400">作者：</span>{{ book.author || '未知' }}</p>
-                            <p><span class="text-gray-400">出版社：</span>{{ book.publisher || '未知' }}</p>
-                            <p><span class="text-gray-400">ISBN：</span>{{ book.isbn || '未知' }}</p>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <span
-                                class="inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full text-xs font-medium"
-                                :class="(book.on_shelf_count || 0) > 0 ? 'bg-success/20 text-success' : 'bg-danger/20 text-danger'">
-                                可借：{{ book.on_shelf_count ?? 0 }}
-                            </span>
+        <!-- 图书列表 - 水平分页卡片系统 -->
+        <div v-if="total > 0" class="flex-grow flex items-center justify-center pt-24">
+            <div class="relative w-full h-full overflow-hidden flex items-center">
+                <!-- 卡片轨道容器 -->
+                <div class="card-track flex transition-transform duration-300 cubic-bezier(0.2, 0.8, 0.2, 1)"
+                    :style="trackStyle" @mousedown="startDrag" @touchstart="startDrag" @mousemove="onDrag"
+                    @touchmove="onDrag" @mouseup="endDrag" @touchend="endDrag" @mouseleave="endDrag">
+                    <!-- 卡片 -->
+                    <div v-for="(book, index) in books" :key="book.book_id" class="book-card flex-shrink-0">
+                        <!-- 卡片容器 -->
+                        <div class="card-container w-full h-full" :class="{'flipped': book._isFlipped}">
+                            <!-- 卡片正面 -->
+                            <div
+                                class="card-front w-full h-full bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden flex flex-col">
+                                <!-- 序号 -->
+                                <div
+                                    class="absolute top-4 left-4 bg-primary/10 text-primary text-xs font-bold px-2 py-1 rounded-full">
+                                    {{ index + 1 }} / {{ total }}
+                                </div>
+
+                                <!-- 上半部分 - 固定 -->
+                                <div class="p-4 sm:p-6 flex flex-col items-center">
+                                    <!-- 封面 -->
+                                    <div
+                                        class="w-40 sm:w-48 h-56 sm:h-64 flex-shrink-0 bg-gray-100 rounded-lg flex flex-col items-center justify-center overflow-hidden border border-gray-200 shadow-md transition-transform duration-300 hover:scale-105 mb-4 sm:mb-6">
+                                        <img v-if="book.cover" :src="book.cover" alt="封面"
+                                            class="w-full h-full object-cover">
+                                        <template v-else>
+                                            <span
+                                                class="material-symbols-outlined text-gray-300 text-4xl sm:text-6xl mb-1 sm:mb-2">image</span>
+                                            <span class="text-gray-400 text-xs sm:text-sm">暂无封面</span>
+                                        </template>
+                                    </div>
+
+                                    <!-- 详情 -->
+                                    <h2
+                                        class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-2 sm:mb-3 text-center">
+                                        {{ book.title }}</h2>
+                                    <div
+                                        class="space-y-1 sm:space-y-2 text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 w-full max-w-md">
+                                        <p class="flex justify-between"><span class="text-gray-400">作者：</span><span>{{
+                                                book.author || '未知' }}</span></p>
+                                        <p class="flex justify-between"><span class="text-gray-400">出版社：</span><span>{{
+                                                book.publisher || '未知' }}</span></p>
+                                        <p class="flex justify-between"><span class="text-gray-400">ISBN：</span><span>{{
+                                                book.isbn || '未知' }}</span></p>
+                                    </div>
+                                    <div class="flex items-center gap-3 mb-4 sm:mb-6">
+                                        <span
+                                            class="inline-flex items-center px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-medium"
+                                            :class="(book.on_shelf_count || 0) > 0 ? 'bg-success/20 text-success' : 'bg-danger/20 text-danger'">
+                                            可借：{{ book.on_shelf_count ?? 0 }}
+                                        </span>
+                                    </div>
+
+                                    <!-- 翻面按钮 -->
+                                    <div
+                                        class="absolute top-4 right-4 flex items-center gap-2 bg-white/70 backdrop-blur-sm rounded-full px-2 py-1 shadow-sm border border-gray-100">
+
+                                        <span class="text-[10px] text-gray-500 whitespace-nowrap">
+                                            查看馆藏
+                                        </span>
+
+                                        <button
+                                            class="flex items-center justify-center text-gray-500 hover:text-primary transition-transform duration-300"
+                                            @click.stop="toggleFlip(book)">
+                                            <span class="material-symbols-outlined text-lg">autorenew</span>
+                                        </button>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 卡片反面 -->
+                            <div
+                                class="card-back w-full h-full bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden flex flex-col">
+                                <!-- 标题 -->
+                                <div class="p-4 sm:p-6 border-b border-gray-200 flex justify-between items-center">
+                                    <h3 class="text-lg font-bold text-gray-800">馆藏明细</h3>
+                                    <div class="absolute top-4 right-4">
+                                        <button
+                                            class="flex items-center justify-center text-gray-500 hover:text-primary transition-transform duration-300 bg-white/70 backdrop-blur-sm rounded-full w-8 h-8 shadow-sm border border-gray-100"
+                                            @click.stop="toggleFlip(book)">
+                                            <span class="material-symbols-outlined text-lg">arrow_back</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- 馆藏信息 - 可滚动区域 -->
+                                <div class="flex-grow overflow-y-auto" @mousedown="stopPropagation"
+                                    @touchstart="stopPropagation" @mousemove="stopPropagation"
+                                    @touchmove="stopPropagation">
+                                    <div class="p-4 sm:p-6">
+                                        <div v-if="book._loadingItems"
+                                            class="flex flex-col items-center justify-center py-6 sm:py-8 text-primary">
+                                            <div class="relative mb-2">
+                                                <div
+                                                    class="h-6 sm:h-8 w-6 sm:w-8 rounded-full border-2 sm:border-3 border-t-transparent border-primary animate-spin">
+                                                </div>
+                                            </div>
+                                            <span class="text-sm">正在加载馆藏信息...</span>
+                                        </div>
+
+                                        <div v-else-if="book._items && book._items.length > 0">
+                                            <h4 class="text-sm font-bold text-gray-700 mb-3 sm:mb-4 flex items-center">
+                                                <span
+                                                    class="material-symbols-outlined text-lg mr-1.5 text-primary">list_alt</span>
+                                                共 {{ book._itemsTotal }} 条
+                                            </h4>
+                                            <div class="overflow-x-auto">
+                                                <table class="w-full text-xs text-left">
+                                                    <thead
+                                                        class="text-xs text-gray-500 bg-white border-b border-gray-200 sticky top-0">
+                                                        <tr>
+                                                            <th class="px-2 sm:px-3 py-1 sm:py-2 font-medium">索书号</th>
+                                                            <th class="px-2 sm:px-3 py-1 sm:py-2 font-medium">馆藏地</th>
+                                                            <th class="px-2 sm:px-3 py-1 sm:py-2 font-medium">状态</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody class="divide-y divide-gray-100">
+                                                        <tr v-for="item in book._items" :key="item.item_id" :class="[
+                                                                'transition-colors duration-150',
+                                                                isPreferredCampus(item.campus_id) ? 'bg-blue-100/50 hover:bg-blue-100/70' : 'hover:bg-white/80'
+                                                            ]">
+                                                            <td
+                                                                class="px-2 sm:px-3 py-1 sm:py-2 font-mono text-gray-700 text-xs">
+                                                                {{ item.call_no || '-' }}
+                                                            </td>
+                                                            <td class="px-2 sm:px-3 py-1 sm:py-2">
+                                                                <span v-if="isPreferredCampus(item.campus_id)"
+                                                                    class="inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs font-bold bg-primary text-white ring-1 ring-primary/20"
+                                                                    :title="'符合您搜索的校区 | 代码: ' + item.current_location_code">
+                                                                    {{ item.current_location_name ||
+                                                                    item.current_location_code || '-'
+                                                                    }}
+                                                                </span>
+                                                                <span v-else
+                                                                    class="inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs font-medium bg-primary/10 text-primary border border-primary/20"
+                                                                    :title="'代码: ' + item.current_location_code">
+                                                                    {{ item.current_location_name ||
+                                                                    item.current_location_code || '-'
+                                                                    }}
+                                                                </span>
+                                                            </td>
+                                                            <td class="px-2 sm:px-3 py-1 sm:py-2">
+                                                                <span
+                                                                    class="inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs font-medium"
+                                                                    :class="getStatusStyle(item.circulation_attribute_name).class"
+                                                                    :title="'代码: ' + item.circulation_attribute_code">
+                                                                    {{ item.circulation_attribute_name ||
+                                                                    item.circulation_attribute_code || '-' }}
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                        <div v-else
+                                            class="text-center py-6 sm:py-8 text-gray-500 text-sm bg-white rounded border border-gray-100 flex flex-col items-center">
+                                            <span
+                                                class="material-symbols-outlined text-2xl sm:text-3xl text-gray-300 mb-2">inventory</span>
+                                            该书暂无馆藏明细
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
 
-                    <!-- 展开图标 -->
-                    <div class="text-gray-400 p-2 transition-transform duration-300 hover:scale-110">
-                        <span class="material-symbols-outlined transition-transform duration-300"
-                            :class="{'rotate-180': book._showItems}">
-                            expand_more
-                        </span>
+        <!-- 搜索框区域 - 固定在页面底部，备案号上方 -->
+        <div class="fixed bottom-10 left-0 right-0 bg-light border-t border-gray-200 py-4 px-4 sm:px-8 z-10">
+            <div class="max-w-4xl mx-auto">
+                <!-- 尝试这样搜索 - 移到搜索框上方，并在搜索时和显示结果时隐藏 -->
+                <div v-if="!isSearching && !searched" class="mb-3 sm:mb-4">
+                    <p class="text-xs sm:text-sm text-gray-500 mb-2 flex items-center">
+                        <span class="material-symbols-outlined text-primary mr-1 text-sm sm:text-base">lightbulb</span>
+                        尝试这样搜索
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <button @click="intentPhrase = '鼓楼或者仙林的朱光潜、宗白华、李泽厚的书'"
+                            class="px-2 sm:px-3 py-1 text-xs bg-primary/10 text-primary rounded-full hover:bg-primary/20 transition transform hover:scale-105 active:scale-95">
+                            鼓楼或者仙林的朱光潜、宗白华、李泽厚的书
+                        </button>
+                        <button @click="intentPhrase = '董乐山翻译的一九八四，鼓楼的'"
+                            class="px-2 sm:px-3 py-1 text-xs bg-primary/10 text-primary rounded-full hover:bg-primary/20 transition transform hover:scale-105 active:scale-95">
+                            董乐山翻译的一九八四，鼓楼的
+                        </button>
+                        <button @click="intentPhrase = '苏州校区，人民文学出版社的史记'"
+                            class="px-2 sm:px-3 py-1 text-xs bg-primary/10 text-primary rounded-full hover:bg-primary/20 transition transform hover:scale-105 active:scale-95">
+                            苏州校区，人民文学出版社的史记
+                        </button>
                     </div>
                 </div>
 
-                <!-- 馆藏信息 (折叠区域) -->
-                <transition name="slide-fade">
-                    <div v-if="book._showItems" class="bg-primary/10 border-t border-gray-100 p-5 sm:p-6">
-
-                        <div v-if="book._loadingItems"
-                            class="flex flex-col items-center justify-center py-8 text-primary">
-                            <div class="relative mb-2">
-                                <div
-                                    class="h-8 w-8 rounded-full border-3 border-t-transparent border-primary animate-spin">
-                                </div>
-                            </div>
-                            <span class="text-sm">正在加载馆藏信息...</span>
+                <div
+                    class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col sm:flex-row gap-3 sm:gap-4 items-center card-hover">
+                    <div class="flex-1 w-full relative">
+                        <input type="text" v-model="intentPhrase" @keyup.enter="searchBooksNL"
+                            placeholder="A sentence is all you need!"
+                            class="w-full pl-3 sm:pl-4 pr-14 sm:pr-16 py-2.5 sm:py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition input-focus"
+                            :disabled="isSearching">
+                        <div class="absolute right-3 top-1/2 -translate-y-1/2 text-xs"
+                            :class="charCount > 50 ? 'text-danger font-semibold' : 'text-gray-400'">
+                            {{ charCount }}/50
                         </div>
-
-                        <div v-else-if="book._items && book._items.length > 0">
-                            <h3 class="text-sm font-bold text-gray-700 mb-3 flex items-center">
-                                <span class="material-symbols-outlined text-lg mr-1.5 text-primary">list_alt</span>
-                                馆藏明细 (共 {{ book._itemsTotal }} 条)
-                            </h3>
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-sm text-left">
-                                    <thead class="text-xs text-gray-500 bg-white border-b border-gray-200">
-                                        <tr>
-                                            <th class="px-4 py-2 font-medium">索书号</th>
-                                            <th class="px-4 py-2 font-medium">条码号</th>
-                                            <th class="px-4 py-2 font-medium">馆藏地</th>
-                                            <th class="px-4 py-2 font-medium">处理状态</th>
-                                            <th class="px-4 py-2 font-medium">流通状态</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-gray-100">
-                                        <tr v-for="item in book._items" :key="item.item_id" :class="[
-                                                'transition-colors duration-150',
-                                                isPreferredCampus(item.campus_id) ? 'bg-blue-100/50 hover:bg-blue-100/70' : 'hover:bg-white/80'
-                                            ]">
-                                            <td class="px-4 py-2 font-mono text-gray-700 text-xs">
-                                                {{ item.call_no || '-' }}
-                                            </td>
-                                            <td class="px-4 py-2 font-mono text-gray-600 text-xs">{{ item.barcode || '-'
-                                                }}</td>
-                                            <td class="px-4 py-2">
-                                                <span v-if="isPreferredCampus(item.campus_id)"
-                                                    class="inline-flex items-center px-2.5 py-1 rounded shadow-sm bg-primary text-white text-xs font-bold ring-2 ring-primary/20"
-                                                    :title="'符合您搜索的校区 | 代码: ' + item.current_location_code">
-                                                    <span
-                                                        class="material-symbols-outlined text-xs mr-1 font-bold">stars</span>
-                                                    {{ item.current_location_name || item.current_location_code || '-'
-                                                    }}
-                                                </span>
-                                                <span v-else
-                                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary border border-primary/20"
-                                                    :title="'代码: ' + item.current_location_code">
-                                                    {{ item.current_location_name || item.current_location_code || '-'
-                                                    }}
-                                                </span>
-                                            </td>
-                                            <td class="px-4 py-2">
-                                                <span
-                                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
-                                                    :class="getStatusStyle(item.process_type_name).class"
-                                                    :title="'代码: ' + item.process_type_code">
-                                                    <span class="material-symbols-outlined text-sm mr-1">{{
-                                                        getStatusStyle(item.process_type_name).icon }}</span>
-                                                    {{ item.process_type_name || item.process_type_code || '-' }}
-                                                </span>
-                                            </td>
-                                            <td class="px-4 py-2">
-                                                <span
-                                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
-                                                    :class="getStatusStyle(item.circulation_attribute_name).class"
-                                                    :title="'代码: ' + item.circulation_attribute_code">
-                                                    <span class="material-symbols-outlined text-sm mr-1">{{
-                                                        getStatusStyle(item.circulation_attribute_name).icon }}</span>
-                                                    {{ item.circulation_attribute_name ||
-                                                    item.circulation_attribute_code || '-' }}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <div v-else
-                            class="text-center py-8 text-gray-500 text-sm bg-white rounded border border-gray-100 flex flex-col items-center">
-                            <span class="material-symbols-outlined text-3xl text-gray-300 mb-2">inventory</span>
-                            该书暂无馆藏明细
-                        </div>
-
                     </div>
-                </transition>
+                    <button @click="searchBooksNL" :disabled="!canSearch || isSearching"
+                        class="w-10 sm:w-12 h-10 sm:h-12 bg-primary hover:bg-secondary text-white rounded-full transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center btn-hover"
+                        v-bind:class="{ 'blink': isSearching }">
+                        <span class="flex items-center justify-center">
+                            <span class="material-symbols-outlined">arrow_upward</span>
+                        </span>
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- 加载更多 -->
-        <div v-if="books.length < total && !isSearching" class="mt-8 text-center pb-12">
-            <button @click="loadMore" :disabled="isLoadingMore"
-                class="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-primary rounded-full shadow-sm transition font-medium text-sm inline-flex items-center disabled:opacity-50 disabled:cursor-not-allowed group btn-hover">
-                <span v-if="isLoadingMore" class="relative mr-2">
-                    <div class="h-4 w-4 rounded-full border-2 border-t-transparent border-primary animate-spin"></div>
-                </span>
-                <span v-else
-                    class="material-symbols-outlined mr-2 group-hover:translate-y-0.5 transition-transform">expand_more</span>
-                {{ isLoadingMore ? '加载中...' : '加载更多书籍' }}
-            </button>
-        </div>
+
 
     </div>
 
     <script src="frontend/script.js"></script>
 
-    <!-- 备案信息 -->
-    <div class="mt-12 mb-6 text-center">
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 text-xs text-gray-500">
-            <a href="https://beian.miit.gov.cn" target="_blank" rel="noopener noreferrer"
-                class="flex items-center hover:text-primary transition">
-                <img src="https://img.alicdn.com/tfs/TB1_p9CRRL0gK0jSZFxXXaP_FXa-112-143.png" alt="ICP备案图标"
-                    class="w-4 h-5 mr-1">
-                苏ICP备2026015844号
-            </a>
-            <a href="https://beian.mps.gov.cn/#/query/webSearch?code=32010602012363" target="_blank"
-                rel="noopener noreferrer" class="flex items-center hover:text-primary transition">
-                <img src="/frontend/image.png" alt="公网安备图标" class="w-4 h-4 mr-1">
-                苏公网安备32010602012363号
-            </a>
+    <!-- 备案信息 - 固定在搜索框底下 -->
+    <div class="fixed bottom-0 left-0 right-0 bg-light border-t border-gray-200 py-2 px-4 sm:px-8 z-5">
+        <div class="max-w-4xl mx-auto">
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 text-xs text-gray-500">
+                <a href="https://beian.miit.gov.cn" target="_blank" rel="noopener noreferrer"
+                    class="flex items-center hover:text-primary transition">
+                    <img src="https://img.alicdn.com/tfs/TB1_p9CRRL0gK0jSZFxXXaP_FXa-112-143.png" alt="ICP备案图标"
+                        class="w-4 h-5 mr-1">
+                    苏ICP备2026015844号
+                </a>
+                <a href="https://beian.mps.gov.cn/#/query/webSearch?code=32010602012363" target="_blank"
+                    rel="noopener noreferrer" class="flex items-center hover:text-primary transition">
+                    <img src="/frontend/image.png" alt="公网安备图标" class="w-4 h-4 mr-1">
+                    苏公网安备32010602012363号
+                </a>
+            </div>
         </div>
     </div>
 </body>

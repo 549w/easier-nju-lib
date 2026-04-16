@@ -29,10 +29,20 @@ from dataclasses import dataclass, field
 from typing import List, Dict
 from openai import OpenAI
 import json
+import logging
+import datetime
 from exceptions import (
     QueryValidationError,
     LLMError
 )
+
+# 配置日志
+logging.basicConfig(
+    filename='app.log',
+    level=logging.INFO,
+    format='%(message)s'
+)
+logger = logging.getLogger(__name__)
 
 def intent_phrase_to_semantic_frame(
         intent_phrase: str
@@ -53,6 +63,18 @@ def intent_phrase_to_semantic_frame(
             },
         max_tokens=200
     )
+    assert completion.usage is not None
+    # 记录日志
+    log_data = {
+        "user_prompt": intent_phrase,
+        "prompt_tokens": completion.usage.prompt_tokens,
+        "completion_tokens": completion.usage.completion_tokens,
+        "finish_reason": completion.choices[0].finish_reason,
+        "completion_id": completion.id,
+        "completion_model": completion.model,
+        "completed_at": datetime.datetime.fromtimestamp(completion.created).isoformat()
+    }
+    logger.info(json.dumps(log_data, indent=4, ensure_ascii=False))
     #print(completion.choices[0].message.content)
     #assert completion.usage is not None
     #print(completion.usage.completion_tokens)

@@ -265,12 +265,16 @@
 <body class="bg-light min-h-screen text-dark font-serif relative overflow-hidden">
     <div id="app" v-cloak class="w-full h-screen flex flex-col">
 
-        <!-- 头部 - 右上角只显示不南搜 -->
+        <!-- 头部 - 左上角只显示不南搜 -->
         <header
             class="absolute top-0 left-0 right-0 z-20 bg-light/90 backdrop-blur-sm border-b border-gray-200 py-4 px-4 sm:px-8">
             <div class="max-w-6xl mx-auto flex justify-between items-center">
                 <div class="flex items-center">
-                    <h1 class="text-xl sm:text-2xl font-bold text-primary font-serif">不南搜</h1>
+                    <h1 class="text-xl sm:text-2xl font-bold text-primary font-serif">
+                        <a href="https://lib.imjhy.com/" target="_blank">
+                            不南搜
+                        </a>
+                    </h1>
                 </div>
                 <div class="flex items-center gap-4">
                     <a href="https://lib-classic.imjhy.com" target="_blank" rel="noopener noreferrer"
@@ -300,25 +304,11 @@
         <!-- 限时开放测试提示 -->
         <div class="absolute top-16 left-0 right-0 z-10 bg-secondary/10 border-b border-secondary/20 py-2 px-4 sm:px-8">
             <div class="max-w-6xl mx-auto text-center">
-                <p class="text-sm text-secondary font-medium">限时开放测试。欢迎加入QQ交流群了解更多：<span
+                <p class="text-sm text-secondary font-medium">限时开放测试。反馈/内测/更新通知欢迎加入QQ交流群：<span
                         class="font-bold">299857244</span>
                 </p>
             </div>
         </div>
-
-        <!-- 错误提示 -->
-        <div v-if="errorMessage" class="absolute top-24 left-0 right-0 z-10 px-4 sm:px-8">
-            <div
-                class="max-w-6xl mx-auto p-4 bg-danger/10 border border-danger/20 text-danger rounded-lg flex items-center shadow-sm">
-                <span class="material-symbols-outlined mr-3 flex-shrink-0">error</span>
-                <span class="text-sm font-medium">{{ errorMessage }}</span>
-                <button @click="errorMessage = ''"
-                    class="ml-auto text-danger/60 hover:text-danger transition flex items-center transform hover:scale-110 active:scale-90">
-                    <span class="material-symbols-outlined text-lg">close</span>
-                </button>
-            </div>
-        </div>
-
 
         <!-- 搜索结果统计 -->
         <div v-if="total > 0" class="absolute top-24 left-0 right-0 z-10 px-4 sm:px-8">
@@ -392,19 +382,20 @@
                                     </div>
 
                                     <!-- 翻面按钮 -->
-                                    <div
-                                        class="absolute top-4 right-4 flex items-center gap-2 bg-white/70 backdrop-blur-sm rounded-full px-2 py-1 shadow-sm border border-gray-100">
-
-                                        <span class="text-[10px] text-gray-500 whitespace-nowrap">
-                                            查看馆藏
-                                        </span>
-
+                                    <div class="absolute top-4 right-4">
                                         <button
-                                            class="flex items-center justify-center text-gray-500 hover:text-primary transition-transform duration-300"
+                                            class="flex items-center gap-2 bg-white/70 backdrop-blur-sm rounded-full px-2 py-1 shadow-sm border border-gray-100 text-gray-500 hover:text-primary transition-transform duration-300"
                                             @click.stop="toggleFlip(book)">
-                                            <span class="material-symbols-outlined text-lg">autorenew</span>
-                                        </button>
 
+                                            <span class="text-[10px] whitespace-nowrap">
+                                                查看馆藏
+                                            </span>
+
+                                            <span class="material-symbols-outlined text-lg">
+                                                autorenew
+                                            </span>
+
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -417,9 +408,17 @@
                                     <h3 class="text-lg font-bold text-gray-800">馆藏明细</h3>
                                     <div class="absolute top-4 right-4">
                                         <button
-                                            class="flex items-center justify-center text-gray-500 hover:text-primary transition-transform duration-300 bg-white/70 backdrop-blur-sm rounded-full w-8 h-8 shadow-sm border border-gray-100"
+                                            class="flex items-center gap-2 bg-white/70 backdrop-blur-sm rounded-full px-2 py-1 shadow-sm border border-gray-100 text-gray-500 hover:text-primary hover:scale-105 active:scale-95 transition-transform duration-300"
                                             @click.stop="toggleFlip(book)">
-                                            <span class="material-symbols-outlined text-lg">arrow_back</span>
+
+                                            <span class="material-symbols-outlined text-lg">
+                                                arrow_back
+                                            </span>
+
+                                            <span class="text-[10px] whitespace-nowrap">
+                                                回到正面
+                                            </span>
+
                                         </button>
                                     </div>
                                 </div>
@@ -481,13 +480,20 @@
                                                                 </span>
                                                             </td>
                                                             <td class="px-2 sm:px-3 py-1 sm:py-2">
-                                                                <span
-                                                                    class="inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs font-medium"
-                                                                    :class="getStatusStyle(item.circulation_attribute_name).class"
-                                                                    :title="'代码: ' + item.circulation_attribute_code">
-                                                                    {{ item.circulation_attribute_name ||
-                                                                    item.circulation_attribute_code || '-' }}
-                                                                </span>
+                                                                <div class="space-y-1">
+                                                                    <span
+                                                                        class="inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs font-medium"
+                                                                        :class="getStatusStyle(item.circulation_attribute_name).class"
+                                                                        :title="'借阅状态代码: ' + item.circulation_attribute_code">
+                                                                        {{ item.circulation_attribute_name ||
+                                                                        item.circulation_attribute_code || '-' }}
+                                                                    </span>
+                                                                    <span
+                                                                        class="inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs font-medium bg-gray-100 text-gray-600"
+                                                                        :title="'流转状态代码: ' + item.process_type">
+                                                                        {{ item.process_type_name || '-' }}
+                                                                    </span>
+                                                                </div>
                                                             </td>
                                                         </tr>
                                                     </tbody>
@@ -512,7 +518,13 @@
 
         <!-- 搜索框区域 - 固定在页面底部，备案号上方 -->
         <div class="fixed bottom-10 left-0 right-0 bg-light border-t border-gray-200 py-4 px-4 sm:px-8 z-10">
+
             <div class="max-w-4xl mx-auto">
+                <!-- 👇错误提示放这里 -->
+                <div v-if="errorMessage"
+                    class="mb-3 p-3 bg-danger/10 border border-danger/20 text-danger rounded-lg text-sm">
+                    {{ errorMessage }}
+                </div>
                 <!-- 尝试这样搜索 - 移到搜索框上方，并在搜索时和显示结果时隐藏 -->
                 <div v-if="!isSearching && !searched" class="mb-3 sm:mb-4">
                     <p class="text-xs sm:text-sm text-gray-500 mb-2 flex items-center">

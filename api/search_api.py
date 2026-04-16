@@ -1,4 +1,9 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import (
+    APIRouter, 
+    HTTPException, 
+    Response,
+    Request
+    )
 from pydantic import BaseModel
 
 from service.search_service import (
@@ -14,9 +19,18 @@ from schemas import (
 )
 from crawler.payloads import AdvancedSearchQuery
 from exceptions import LLMError
+from utils.identity import get_or_set_anon_id
+import logging
+import datetime
+import json
 
 router = APIRouter(prefix="/search", tags=["search"])
-
+logging.basicConfig(
+    filename='app.log',
+    level=logging.INFO,
+    format='%(message)s'
+)
+logger = logging.getLogger(__name__)
 
 class SearchBookRequest(BaseModel):
     intent_phrase: str
@@ -30,10 +44,14 @@ class NLSearchResponse(BaseModel):
 
 
 @router.post("/books/llm_query", response_model=NLSearchResponse)
-async def search_books_llm_query(request: SearchBookRequest):
+async def search_books_llm_query(
+    request_body: SearchBookRequest,
+    request: Request,
+    response: Response
+    ):
     """自然语言搜索书籍"""
     # 验证搜索词长度不超过50字
-    if len(request.intent_phrase.strip()) > 50:
+    if len(request_body.intent_phrase.strip()) > 50:
         raise HTTPException(
             status_code=400,
             detail="搜索词不能超过50个字"
@@ -41,7 +59,7 @@ async def search_books_llm_query(request: SearchBookRequest):
 
     try:
         semantic_frame: SemanticFrameModel = intent_phrase_to_semantic_frame(
-            request.intent_phrase.strip()
+            request_body.intent_phrase.strip()
         )
     except LLMError as e:
         raise HTTPException(
@@ -49,8 +67,15 @@ async def search_books_llm_query(request: SearchBookRequest):
             detail=str(e)
         )
 
-    query = semantic_frame_to_query(semantic_frame, request.page, request.rows)
+    query = semantic_frame_to_query(semantic_frame, request_body.page, request_body.rows)
     search_result = book_search(query)
+    anon_id = get_or_set_anon_id(request, response)
+    log_data = {
+        "anon_id": anon_id,
+        "time": datetime.datetime.now().isoformat(),
+        "user_prompt": request_body.intent_phrase,
+        }
+    logger.info(json.dumps(log_data, indent=4, ensure_ascii=False))
     return NLSearchResponse(query=query, result=search_result)
 
 

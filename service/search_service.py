@@ -66,6 +66,7 @@ def intent_phrase_to_semantic_frame(
     assert completion.usage is not None
     # 记录日志
     log_data = {
+        
         "user_prompt": intent_phrase,
         "prompt_tokens": completion.usage.prompt_tokens,
         "completion_tokens": completion.usage.completion_tokens,

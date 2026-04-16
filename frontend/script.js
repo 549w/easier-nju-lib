@@ -25,18 +25,18 @@ createApp({
         // 状态颜色和图标映射
         const getStatusStyle = (statusName) => {
             const styles = {
-                '可借': { class: 'bg-green-100 text-green-800', icon: 'check' },
-                '在架': { class: 'bg-green-100 text-green-800', icon: 'newsstand' },
-                '签收': { class: 'bg-green-100 text-green-800', icon: 'inventory' },
-                '借出': { class: 'bg-orange-100 text-orange-800', icon: 'block' },
-                '委托借出': { class: 'bg-orange-100 text-orange-800', icon: 'handshake' },
-                '阅览': { class: 'bg-blue-100 text-blue-800', icon: 'import_contacts' },
-                '装订中': { class: 'bg-blue-100 text-blue-800', icon: 'attach_file' },
-                '交接': { class: 'bg-blue-100 text-blue-800', icon: 'transform' },
-                '上委托书架': { class: 'bg-yellow-100 text-yellow-800', icon: 'shelves' },
-                '下架': { class: 'bg-red-100 text-red-800', icon: 'do_not_disturb_on' },
-                '正常': { class: 'bg-green-50 text-green-700', icon: 'auto_awesome' },
-                '编目中': { class: 'bg-blue-50 text-blue-700', icon: 'edit_note' }
+                '可借': { class: 'bg-success/20 text-success', icon: 'check' },
+                '在架': { class: 'bg-success/20 text-success', icon: 'newsstand' },
+                '签收': { class: 'bg-success/20 text-success', icon: 'inventory' },
+                '借出': { class: 'bg-warning/20 text-warning', icon: 'block' },
+                '委托借出': { class: 'bg-warning/20 text-warning', icon: 'handshake' },
+                '阅览': { class: 'bg-primary/20 text-primary', icon: 'import_contacts' },
+                '装订中': { class: 'bg-primary/20 text-primary', icon: 'attach_file' },
+                '交接': { class: 'bg-primary/20 text-primary', icon: 'transform' },
+                '上委托书架': { class: 'bg-warning/20 text-warning', icon: 'shelves' },
+                '下架': { class: 'bg-danger/20 text-danger', icon: 'do_not_disturb_on' },
+                '正常': { class: 'bg-success/10 text-success', icon: 'auto_awesome' },
+                '编目中': { class: 'bg-primary/10 text-primary', icon: 'edit_note' }
             };
             return styles[statusName] || { class: 'bg-gray-100 text-gray-800', icon: 'info' };
         }

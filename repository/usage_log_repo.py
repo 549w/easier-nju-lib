@@ -5,62 +5,106 @@ from typing import List
 
 def create_usage_log(
         conn: sqlite3.Connection,
-        user_id: int,
         user_prompt: str,
         prompt_tokens: int,
         completion_tokens: int,
         finish_reason: str,
         completion_id: str,
         completion_model: str,
-        completed_at: datetime
+        completed_at: datetime,
+        user_id: int|None = None,
+        anon_id: str|None = None
         ) -> None:
     """创建使用日志记录"""
+    if user_id is None and anon_id is None:
+        raise ValueError("user_id和anon_id不能同时为空")
     conn.execute(
         """
         INSERT INTO usage_logs (
-            user_id, user_prompt, prompt_tokens, completion_tokens,
-            finish_reason, completion_id, completion_model, completed_at
+            user_id, 
+            anon_id, 
+            user_prompt, 
+            prompt_tokens, 
+            completion_tokens,
+            finish_reason, 
+            completion_id, 
+            completion_model, 
+            completed_at
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
-            user_id, user_prompt, prompt_tokens, completion_tokens,
-            finish_reason, completion_id, completion_model, completed_at.isoformat()
+            user_id, 
+            anon_id, 
+            user_prompt, 
+            prompt_tokens, 
+            completion_tokens,
+            finish_reason, 
+            completion_id, 
+            completion_model, 
+            completed_at.isoformat()
         )
     )
     conn.commit()
 
 
-def get_usage_logs_by_user(
+def get_usage_logs(
         conn: sqlite3.Connection,
-        user_id: int,
         limit: int = 100,
-        offset: int = 0
+        offset: int = 0,
+        user_id: int|None = None,
+        anon_id: str|None = None
         ) -> List[sqlite3.Row]:
     """查询指定用户的使用日志，按创建时间倒序排列"""
-    cursor = conn.execute(
-        """
-        SELECT * FROM usage_logs
-        WHERE user_id = ?
-        ORDER BY created_at DESC
-        LIMIT ? OFFSET ?
-        """,
-        (user_id, limit, offset,)
-    )
+
+    if user_id is not None:
+        cursor = conn.execute(
+            """
+            SELECT * FROM usage_logs
+            WHERE user_id = ?
+            ORDER BY created_at DESC
+            LIMIT ? OFFSET ?
+            """,
+            (user_id, limit, offset,)
+        )
+    elif anon_id is not None:
+        cursor = conn.execute(
+            """
+            SELECT * FROM usage_logs
+            WHERE anon_id = ?
+            ORDER BY created_at DESC
+            LIMIT ? OFFSET ?
+            """,
+            (anon_id, limit, offset,)
+        )
+    else:
+        raise ValueError("user_id和anon_id不能同时为空")
     return cursor.fetchall()
 
 
-def get_usage_count_by_user(
+def get_usage_count(
         conn: sqlite3.Connection,
-        user_id: int
+        user_id: int|None = None,
+        anon_id: str|None = None
         ) -> int:
     """统计指定用户的使用日志总数"""
-    cursor = conn.execute(
-        """
-        SELECT COUNT(1) FROM usage_logs
-        WHERE user_id = ?
-        """,
-        (user_id,)
-    )
+    if user_id is not None:
+        cursor = conn.execute(
+            """
+            SELECT COUNT(1) FROM usage_logs
+            WHERE user_id = ?
+            """,
+            (user_id,)
+        )
+    elif anon_id is not None:
+        cursor = conn.execute(
+            """
+            SELECT COUNT(1) FROM usage_logs
+            WHERE anon_id = ?
+            """,
+            (anon_id,)
+        )
+    else:
+        raise ValueError("user_id和anon_id不能同时为空")
     row = cursor.fetchone()
     return row[0] if row else 0

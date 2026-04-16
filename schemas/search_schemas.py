@@ -37,7 +37,6 @@ class SemanticFrameModel(BaseModel):
 
         for i, item in enumerate(self.searchItems):
             if self.searchItems[i].searchFieldContent is None or self.searchItems[i].searchFieldContent.strip() == "":
-                print("=============")
                 raise ValueError(f"第{i}个 searchFieldContent 不能为空")
 
         return self

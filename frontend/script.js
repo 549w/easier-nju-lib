@@ -61,6 +61,10 @@ createApp({
             total.value = 0;
             currentQuery.value = null;
 
+            const errorMap = {
+                    TOO_LONG: "请精简表达，不多于五十个字。"
+                };
+
             try {
                 const response = await fetch('/search/books/llm_query', {
                     method: 'POST',
@@ -74,7 +78,10 @@ createApp({
 
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({ detail: '网络请求失败' }));
-                    throw new Error(errorData.detail || '搜索请求失败，请稍后重试');
+                    throw {
+                        "code": errorData.detail?.code || "UNKNOWN_ERROR",
+                        "message": errorData.detail?.message || "有点南搜"
+                    }
                 }
 
                 const data = await response.json();
@@ -90,9 +97,11 @@ createApp({
                     _items: [],
                     _itemsTotal: 0
                 }));
+
+                
             } catch (error) {
                 console.error(error);
-                errorMessage.value = "无法理解你的搜索意图💔";
+                errorMessage.value = errorMap[error.code] || "有点南搜……";
             } finally {
                 isSearching.value = false;
                 searched.value = true;

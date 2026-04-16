@@ -52,9 +52,13 @@ async def search_books_llm_query(
     """自然语言搜索书籍"""
     # 验证搜索词长度不超过50字
     if len(request_body.intent_phrase.strip()) > 50:
+        print("+++++=====+++++=====")
         raise HTTPException(
             status_code=400,
-            detail="搜索词不能超过50个字"
+            detail={
+                "code": "TOO_LONG",
+                "message": "搜索意图不能多于五十个字。"
+            }
         )
 
     try:

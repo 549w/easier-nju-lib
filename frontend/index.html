@@ -150,6 +150,19 @@
                 border-color: #8B4513;
             }
         }
+
+        @keyframes blink {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.2;
+            }
+        }
+
+        .blink {
+            animation: blink 1.6s infinite;
+        }
     </style>
     <!-- 打字动画脚本 -->
     <script>
@@ -192,6 +205,25 @@
 <body class="bg-light min-h-screen text-dark font-serif">
     <div id="app" v-cloak class="max-w-4xl mx-auto p-4 sm:p-8">
 
+        <!-- 回到旧版和GitHub链接 -->
+        <div class="mb-6 flex justify-between items-center">
+            <a href="https://lib-classic.imjhy.com" target="_blank" rel="noopener noreferrer"
+                class="text-sm text-primary hover:underline transition">
+                ← 回到旧版
+            </a>
+            <a href="https://github.com/549w/easier-nju-lib" target="_blank" rel="noopener noreferrer"
+                class="text-sm text-primary hover:underline transition flex items-center">
+                <span class="material-symbols-outlined mr-1 text-xs">code</span>
+                GitHub 仓库
+            </a>
+        </div>
+
+        <!-- 限时开放测试提示 -->
+        <div class="bg-secondary/10 border border-secondary/20 rounded-lg p-3 mb-6 text-center">
+            <p class="text-sm text-secondary font-medium">限时开放测试。欢迎加入QQ交流群了解更多：<span class="font-bold">299857244</span>
+            </p>
+        </div>
+
         <!-- 头部 -->
         <header class="text-center mb-6 mt-4 sm:mb-8 sm:mt-6">
             <div class="flex items-center justify-center mb-2 flex-col sm:flex-row">
@@ -202,22 +234,13 @@
             </p>
         </header>
 
-        <!-- 限时开放测试提示 -->
-        <div class="bg-secondary/10 border border-secondary/20 rounded-lg p-3 mb-6 text-center">
-            <p class="text-sm text-secondary font-medium">限时开放测试。欢迎加入QQ交流群了解更多：<span class="font-bold">299857244</span>
-            </p>
-        </div>
-
         <!-- 搜索框区域 -->
         <div
             class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 mb-6 sm:mb-8 flex flex-col sm:flex-row gap-3 sm:gap-4 items-center card-hover">
             <div class="flex-1 w-full relative">
-                <div class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                    <span class="material-symbols-outlined text-sm sm:text-base">search</span>
-                </div>
                 <input type="text" v-model="intentPhrase" @keyup.enter="searchBooksNL"
                     placeholder="A sentence is all you need!"
-                    class="w-full pl-10 sm:pl-12 pr-14 sm:pr-16 py-2.5 sm:py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition input-focus"
+                    class="w-full pl-3 sm:pl-4 pr-14 sm:pr-16 py-2.5 sm:py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition input-focus"
                     :disabled="isSearching">
                 <div class="absolute right-3 top-1/2 -translate-y-1/2 text-xs"
                     :class="charCount > 50 ? 'text-danger font-semibold' : 'text-gray-400'">
@@ -225,22 +248,24 @@
                 </div>
             </div>
             <button @click="searchBooksNL" :disabled="!canSearch || isSearching"
-                class="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 bg-primary hover:bg-secondary text-white font-medium rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[100px] sm:min-w-[120px] btn-hover">
-                <span v-if="isSearching" class="flex items-center">
-                    <div class="relative">
-                        <div
-                            class="h-4 sm:h-5 w-4 sm:w-5 rounded-full border-2 border-t-transparent border-white animate-spin mr-1 sm:mr-2">
-                        </div>
-                    </div>
-                    <span class="text-sm sm:text-base">理解中</span>
-                </span>
-                <span v-else class="flex items-center">
-                    <span class="material-symbols-outlined text-sm sm:text-base mr-1 sm:mr-2">search</span>
-                    <span class="text-sm sm:text-base">开始理解</span>
+                class="w-10 sm:w-12 h-10 sm:h-12 bg-primary hover:bg-secondary text-white rounded-full transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center btn-hover"
+                v-bind:class="{ 'blink': isSearching }">
+                <span class="flex items-center justify-center">
+                    <span class="material-symbols-outlined">arrow_upward</span>
                 </span>
             </button>
         </div>
 
+        <!-- 错误提示 -->
+        <div v-if="errorMessage"
+            class="mb-6 p-4 bg-danger/10 border border-danger/20 text-danger rounded-lg flex items-center shadow-sm">
+            <span class="material-symbols-outlined mr-3 flex-shrink-0">error</span>
+            <span class="text-sm font-medium">{{ errorMessage }}</span>
+            <button @click="errorMessage = ''"
+                class="ml-auto text-danger/60 hover:text-danger transition flex items-center transform hover:scale-110 active:scale-90">
+                <span class="material-symbols-outlined text-lg">close</span>
+            </button>
+        </div>
 
 
         <!-- AI 搜索示例 -->
@@ -263,17 +288,6 @@
                     苏州校区，人民文学出版社的史记
                 </button>
             </div>
-        </div>
-
-        <!-- 错误提示 -->
-        <div v-if="errorMessage"
-            class="mb-6 p-4 bg-danger/10 border border-danger/20 text-danger rounded-lg flex items-center shadow-sm">
-            <span class="material-symbols-outlined mr-3 flex-shrink-0">error</span>
-            <span class="text-sm font-medium">{{ errorMessage }}</span>
-            <button @click="errorMessage = ''"
-                class="ml-auto text-danger/60 hover:text-danger transition flex items-center transform hover:scale-110 active:scale-90">
-                <span class="material-symbols-outlined text-lg">close</span>
-            </button>
         </div>
 
         <!-- 搜索结果统计 -->

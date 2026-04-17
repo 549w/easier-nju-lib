@@ -134,3 +134,55 @@ def find_completion_by_prompt(
     )
     row = cursor.fetchone()
     return row[0] if row else None
+
+def get_usage_summary(
+        conn: sqlite3.Connection
+        ):
+    cursor = conn.execute("""
+        SELECT
+            COUNT(*) as total,
+            SUM(CASE WHEN is_cache_hit = 1 THEN 1 ELSE 0 END) as cache_hits,
+            SUM(prompt_tokens + COALESCE(completion_tokens, 0)) as total_tokens
+        FROM usage_logs
+    """)
+    row = cursor.fetchone()
+
+    total = row[0]
+    cache_hits = row[1] or 0
+    total_tokens = row[2] or 0
+
+    return {
+        "total_requests": total,
+        "cache_hit_rate": cache_hits / total if total else 0,
+        "total_tokens": total_tokens
+    }
+
+def get_daily_stats(
+        conn: sqlite3.Connection
+        ):
+    cursor = conn.execute("""
+        SELECT
+            DATE(created_at) as day,
+            COUNT(*) as total,
+            SUM(is_cache_hit) as cache_hits,
+            SUM(prompt_tokens + COALESCE(completion_tokens, 0)) as tokens
+        FROM usage_logs
+        GROUP BY DATE(created_at)
+        ORDER BY day ASC
+    """)
+    return cursor.fetchall()
+
+def get_token_cost(conn: sqlite3.Connection):
+    cursor = conn.execute("""
+        SELECT
+            SUM(prompt_tokens) as prompt_tokens,
+            SUM(completion_tokens) as completion_tokens
+        FROM usage_logs
+        WHERE is_cache_hit = 0
+    """)
+    row = cursor.fetchone()
+
+    return {
+        "prompt_tokens": row[0] or 0,
+        "completion_tokens": row[1] or 0,
+    }

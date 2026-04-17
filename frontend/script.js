@@ -22,12 +22,12 @@ createApp({
         const cardRotation = ref(0)
 
         // 计算输入字符数
-        const charCount = Vue.computed(() => {
+        const charCount = computed(() => {
             return intentPhrase.value.length
         })
 
         // 判断是否可以搜索（非空且不超过50字）
-        const canSearch = Vue.computed(() => {
+        const canSearch = computed(() => {
             return intentPhrase.value.trim() && charCount.value <= 50
         })
 

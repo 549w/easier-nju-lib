@@ -8,7 +8,7 @@ WORKDIR /app
 COPY requirements.txt .
 
 # 安装所有依赖
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt --index-url https://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
 
 # 复制应用的所有代码到容器中的 /app 目录
 COPY . /app

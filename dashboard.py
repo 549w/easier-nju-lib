@@ -145,7 +145,7 @@ try:
             if page > 1:
                 if st.button("Previous Page"):
                     st.session_state.page -= 1
-                    st.experimental_rerun()
+                    st.rerun()
         
         with col2:
             st.write(f"Page {page}")
@@ -154,7 +154,7 @@ try:
             if len(logs) == page_size:
                 if st.button("Next Page"):
                     st.session_state.page += 1
-                    st.experimental_rerun()
+                    st.rerun()
     else:
         st.info("No logs found")
         
@@ -236,7 +236,7 @@ if fuzzy_prompt:
             if st.button(suggestion["user_prompt"]):
                 # 当用户点击建议时，自动填充到搜索框
                 st.session_state.fuzzy_prompt = suggestion["user_prompt"]
-                st.experimental_rerun()
+                st.rerun()
     else:
         st.info("No suggestions found")
 

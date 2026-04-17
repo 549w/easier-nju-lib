@@ -85,3 +85,17 @@ crawler/examples/
 
 # runtime data
 data/
+
+# Ignore Python bytecode files
+*.pyc
+__pycache__/
+
+# Ignore virtual environment folder
+venv/
+
+# Ignore .env file
+.env
+
+# Ignore Docker and nginx config files (if needed)
+docker-compose.yml
+nginx.conf

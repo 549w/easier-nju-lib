@@ -5,16 +5,16 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # 复制当前目录下的 requirements.txt 到容器中的 /app 目录
-COPY dashboard/requirements.txt .
+COPY requirements.txt .
 
 # 安装所有依赖
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 复制应用的所有代码到容器中的 /app 目录
-COPY dashboard /app
+COPY . /app
 
-# 暴露端口，Streamlit 默认运行在 8502 端口
-EXPOSE 8502
+# 暴露端口，Streamlit 默认运行在 8501 端口
+EXPOSE 8501
 
 # 启动 Streamlit 服务
-CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+CMD ["streamlit", "run", "dashboard.py", "--server.port=8501", "--server.address=0.0.0.0"]

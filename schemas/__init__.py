@@ -2,6 +2,7 @@
 from schemas.search_schemas import (
     SearchItemModel,
     SemanticFrameModel,
+    LLMMetadataModel
 )
 from schemas.response_schemas import (
     ItemResponse,

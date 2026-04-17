@@ -23,10 +23,11 @@ from schemas import (
     SemanticFrameModel,
     BookSearchResponse,
     ItemResponse,
-    ItemSearchResponse
+    ItemSearchResponse,
+    LLMMetadataModel
     )
 from dataclasses import dataclass, field
-from typing import List, Dict
+from typing import List, Dict, Tuple
 from openai import OpenAI
 import json
 import logging
@@ -46,7 +47,7 @@ logger = logging.getLogger(__name__)
 
 def intent_phrase_to_semantic_frame(
         intent_phrase: str
-) -> SemanticFrameModel:
+) -> Tuple[SemanticFrameModel, LLMMetadataModel]:
     client = OpenAI(
         api_key=DASHSCOPE_API_KEY,
         base_url=MODEL_BASE_URL,
@@ -66,7 +67,7 @@ def intent_phrase_to_semantic_frame(
     assert completion.usage is not None
     # 记录日志
     log_data = {
-        
+        "model": completion.model,
         "user_prompt": intent_phrase,
         "prompt_tokens": completion.usage.prompt_tokens,
         "completion_tokens": completion.usage.completion_tokens,
@@ -95,7 +96,14 @@ def intent_phrase_to_semantic_frame(
     content: str = completion.choices[0].message.content
     content_dict: Dict = json.loads(content)
     try:
-        return SemanticFrameModel(**content_dict)
+        return SemanticFrameModel(**content_dict), LLMMetadataModel(
+            completed_at=datetime.datetime.fromtimestamp(completion.created),
+            completion_id=completion.id,
+            completion_model=completion.model,
+            completion_tokens=completion.usage.completion_tokens,
+            finish_reason=completion.choices[0].finish_reason,
+            prompt_tokens=completion.usage.prompt_tokens
+            )
     except Exception as e:
         #print("LLM输出不合法:", content)
         raise LLMError(e)

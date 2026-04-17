@@ -32,13 +32,17 @@ CREATE TABLE IF NOT EXISTS usage_logs (
 
     user_id INTEGER,
     anon_id TEXT,
+    ip TEXT,
 
     user_prompt TEXT NOT NULL,
-    prompt_tokens INTEGER NOT NULL,
-    completion_tokens INTEGER NOT NULL,
-    finish_reason TEXT NOT NULL,
-    completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    completion_id TEXT NOT NULL,
-    completion_model TEXT NOT NULL,
+    completion_content TEXT,
+    prompt_tokens INTEGER,
+    completion_tokens INTEGER,
+    finish_reason TEXT,
+    completed_at TIMESTAMP,
+    completion_id TEXT,
+    completion_model TEXT,
+
+    is_cache_hit INTEGER DEFAULT 0,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );

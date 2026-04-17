@@ -9,6 +9,8 @@ from crawler.payloads import (
     SearchField,
 )
 
+import datetime
+
 
 class SearchItemModel(BaseModel):
     """搜索项模型"""
@@ -40,3 +42,12 @@ class SemanticFrameModel(BaseModel):
                 raise ValueError(f"第{i}个 searchFieldContent 不能为空")
 
         return self
+
+class LLMMetadataModel(BaseModel):
+    """LLM元数据模型"""
+    prompt_tokens: int
+    completion_tokens: int
+    finish_reason: str
+    completed_at: datetime.datetime
+    completion_id: str
+    completion_model: str
